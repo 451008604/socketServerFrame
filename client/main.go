@@ -1,27 +1,30 @@
 package main
 
 import (
-	"SocketServerFrame/client/base"
 	"fmt"
+	"socketServerFrame/client/base"
+	"sync"
 	"time"
 )
 
 func main() {
-	base.NewConnection("127.0.0.1", "7777")
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	for n := 0; n < 5; n++ {
+		go func(n int) {
+			conn := base.NewConnection("127.0.0.1", "7777")
+			defer conn.SetBlocking()
+			fmt.Println(fmt.Sprintf("connect Id %v", n))
 
-	// for true {
-	base.SendMsg([]byte("ping test"))
-	// 	time.Sleep(1 * time.Second)
-	// }
-
-	go func() {
-		i := 0
-		for true {
-			i++
-			base.SendMsg([]byte(fmt.Sprintf("%v\n", i)))
-			time.Sleep(1 * time.Second)
-		}
-	}()
-
-	base.SetBlocking()
+			go func() {
+				i := 0
+				for true {
+					i++
+					conn.SendMsg([]byte(fmt.Sprintf("%v\t", i)))
+					time.Sleep(1 * time.Second)
+				}
+			}()
+		}(n)
+	}
+	wg.Wait()
 }

@@ -50,16 +50,12 @@ func (s *Server) Start() {
 				// 不断的循环从客户端获取数据
 				for {
 					buf := make([]byte, 512)
-					cnt, err := conn.Read(buf)
-					if err != nil {
-						fmt.Println("recv buf err ", err)
+					cnt, _ := conn.Read(buf)
+					if cnt == 0 {
 						continue
 					}
 					// 回显
-					if _, err := conn.Write(buf[:cnt]); err != nil {
-						fmt.Println("write back buf err ", err)
-						continue
-					}
+					_, _ = conn.Write(buf[:cnt])
 				}
 			}()
 		}
