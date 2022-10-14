@@ -3,6 +3,7 @@ package znet
 import (
 	"fmt"
 	"net"
+	"socketServerFrame/config"
 	"socketServerFrame/iface"
 	"time"
 )
@@ -12,17 +13,17 @@ type Server struct {
 	Name      string        // 服务器名称
 	IPVersion string        // tcp4 or other
 	IP        string        // IP地址
-	Port      int           // 服务端口
+	Port      string        // 服务端口
 	Router    iface.IRouter // 当前Server由用户绑定的回调router,也就是Server注册的链接对应的处理业务
 	connID    uint32        // 客户端连接自增ID
 }
 
-func NewServer(name string) iface.IServer {
+func NewServer() iface.IServer {
 	s := &Server{
-		Name:      name,
+		Name:      config.GetGlobalObject().Name,
 		IPVersion: "tcp4",
-		IP:        "0.0.0.0",
-		Port:      7777,
+		IP:        config.GetGlobalObject().Host,
+		Port:      config.GetGlobalObject().TcpPort,
 		Router:    nil,
 		connID:    0,
 	}
@@ -33,7 +34,7 @@ func (s *Server) Start() {
 	// 开启一个go去做服务端Listener服务
 	go func() {
 		// 1.获取TCP的Address
-		addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%d", s.IP, s.Port))
+		addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%s", s.IP, s.Port))
 		if err != nil {
 			fmt.Println("服务启动失败：", err.Error())
 			return

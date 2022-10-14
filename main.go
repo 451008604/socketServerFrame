@@ -1,8 +1,8 @@
 package main
 
 import (
-	"SocketServerFrame/znet"
 	"socketServerFrame/iface"
+	"socketServerFrame/znet"
 )
 
 type PingRouter struct {
@@ -14,7 +14,7 @@ func (p *PingRouter) Handler(req iface.IRequest) {
 }
 
 func main() {
-	s := znet.NewServer("myServer")
+	s := znet.NewServer()
 	s.AddRouter(&PingRouter{})
 	s.Server()
 }
