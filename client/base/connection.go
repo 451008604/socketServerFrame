@@ -26,7 +26,7 @@ type CustomConnect struct {
 var restartConnectNum = 0
 
 // NewConnection 新建连接
-func NewConnection(address, port string) (conn *CustomConnect) {
+func (c *CustomConnect) NewConnection(address, port string) {
 	// 与服务器请求连接
 	serverAddress := address + ":" + port
 	dial, err := net.Dial("tcp", serverAddress)
@@ -36,25 +36,24 @@ func NewConnection(address, port string) (conn *CustomConnect) {
 
 		// 与服务器连接失败等待2秒重试，期间会阻塞主进程
 		time.Sleep(2 * time.Second)
-		NewConnection(address, port)
+		c.NewConnection(address, port)
 		return
 	}
 	restartConnectNum = 0
 
 	// 关闭旧的连接
-	if conn != nil {
-		_ = conn.Close()
+	if c.Conn != nil {
+		_ = c.Conn.Close()
 	}
 	// 创建新的连接
-	conn = &CustomConnect{}
-	conn.Conn = dial
-	conn.address = address
-	conn.port = port
-	conn.bufferLen = 512
+	c.Conn = dial
+	c.address = address
+	c.port = port
+	c.bufferLen = 512
 
 	// 阻塞主进程
-	conn.wg = &sync.WaitGroup{}
-	conn.wg.Add(1)
+	c.wg = &sync.WaitGroup{}
+	c.wg.Add(1)
 	// 监听服务器返回的消息
 	go func(conn *CustomConnect) {
 		conn.wg.Done()
@@ -65,12 +64,11 @@ func NewConnection(address, port string) (conn *CustomConnect) {
 			}
 
 			// 服务器返回的消息
-			fmt.Printf(string(receiveData))
+			fmt.Printf("服务返回 -> %s", string(receiveData))
 		}
-	}(conn)
-	conn.wg.Wait()
-	conn.wg.Add(1)
-	return conn
+	}(c)
+	c.wg.Wait()
+	c.wg.Add(1)
 }
 
 // SetBlocking 阻塞主进程，等待接受消息
@@ -93,7 +91,7 @@ func (c *CustomConnect) SendMsg(msg []byte) {
 	if err != nil {
 		fmt.Println("SendMsg err ", err)
 		// 重新连接服务器
-		NewConnection(c.address, c.port)
+		c.NewConnection(c.address, c.port)
 	}
 }
 

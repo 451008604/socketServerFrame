@@ -1,9 +1,10 @@
 package znet
 
 import (
-	"SocketServerFrame/ziface"
+	"errors"
 	"fmt"
 	"net"
+	"socketServerFrame/iface"
 	"time"
 )
 
@@ -13,6 +14,14 @@ type Server struct {
 	IPVersion string // tcp4 or other
 	IP        string // IP地址
 	Port      int    // 服务端口
+	connID    uint32 // 客户端连接自增ID
+}
+
+func ResToClient(conn *net.TCPConn, data []byte, cnt int) error {
+	if _, err := conn.Write(data[:cnt]); err != nil {
+		return errors.New("回复客户端失败")
+	}
+	return nil
 }
 
 func (s *Server) Start() {
@@ -34,30 +43,21 @@ func (s *Server) Start() {
 
 		// 3.启动server网络连接业务
 		for true {
-			// 等待客户端建立请求链接
+			// 等待客户端建立请求连接
 			var conn *net.TCPConn
 			conn, err = tcp.AcceptTCP()
 			if err != nil {
 				fmt.Println("AcceptTCP ERR：", err.Error())
 				continue
 			}
-
+			// 自增connID
+			s.connID++
 			// 建立连接成功
-			fmt.Println("成功建立新的客户端连接 -> ", conn.RemoteAddr().String())
+			fmt.Println("成功建立新的客户端连接 -> ", conn.RemoteAddr().String(), "connID - ", s.connID)
 
-			// 我们这里暂时做一个最大512字节的回显服务
-			go func() {
-				// 不断的循环从客户端获取数据
-				for {
-					buf := make([]byte, 512)
-					cnt, _ := conn.Read(buf)
-					if cnt == 0 {
-						continue
-					}
-					// 回显
-					_, _ = conn.Write(buf[:cnt])
-				}
-			}()
+			// 建立新的连接并监听客户端请求的消息
+			dealConn := NewConnection(conn, s.connID, ResToClient)
+			go dealConn.Start()
 		}
 	}()
 }
@@ -75,7 +75,7 @@ func (s *Server) Server() {
 	}
 }
 
-func NewServer(name string) ziface.IServer {
+func NewServer(name string) iface.IServer {
 	s := &Server{
 		Name:      name,
 		IPVersion: "tcp4",

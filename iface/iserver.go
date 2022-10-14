@@ -1,4 +1,4 @@
-package ziface
+package iface
 
 // IServer 定义服务器接口
 type IServer interface {
