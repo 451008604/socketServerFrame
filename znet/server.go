@@ -1,7 +1,6 @@
 package znet
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"socketServerFrame/iface"
@@ -10,18 +9,24 @@ import (
 
 // Server 定义Server服务类实现IServer接口
 type Server struct {
-	Name      string // 服务器名称
-	IPVersion string // tcp4 or other
-	IP        string // IP地址
-	Port      int    // 服务端口
-	connID    uint32 // 客户端连接自增ID
+	Name      string        // 服务器名称
+	IPVersion string        // tcp4 or other
+	IP        string        // IP地址
+	Port      int           // 服务端口
+	Router    iface.IRouter // 当前Server由用户绑定的回调router,也就是Server注册的链接对应的处理业务
+	connID    uint32        // 客户端连接自增ID
 }
 
-func ResToClient(conn *net.TCPConn, data []byte, cnt int) error {
-	if _, err := conn.Write(data[:cnt]); err != nil {
-		return errors.New("回复客户端失败")
+func NewServer(name string) iface.IServer {
+	s := &Server{
+		Name:      name,
+		IPVersion: "tcp4",
+		IP:        "0.0.0.0",
+		Port:      7777,
+		Router:    nil,
+		connID:    0,
 	}
-	return nil
+	return s
 }
 
 func (s *Server) Start() {
@@ -56,7 +61,7 @@ func (s *Server) Start() {
 			fmt.Println("成功建立新的客户端连接 -> ", conn.RemoteAddr().String(), "connID - ", s.connID)
 
 			// 建立新的连接并监听客户端请求的消息
-			dealConn := NewConnection(conn, s.connID, ResToClient)
+			dealConn := NewConnection(conn, s.connID, s.Router)
 			go dealConn.Start()
 		}
 	}()
@@ -75,12 +80,6 @@ func (s *Server) Server() {
 	}
 }
 
-func NewServer(name string) iface.IServer {
-	s := &Server{
-		Name:      name,
-		IPVersion: "tcp4",
-		IP:        "0.0.0.0",
-		Port:      7777,
-	}
-	return s
+func (s *Server) AddRouter(router iface.IRouter) {
+	s.Router = router
 }

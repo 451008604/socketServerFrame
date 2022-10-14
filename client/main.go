@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"socketServerFrame/client/api"
 	"socketServerFrame/client/base"
 	"sync"
 	"time"
@@ -19,7 +20,11 @@ func main() {
 				i := 0
 				for true {
 					i++
-					conn.SendMsg([]byte(fmt.Sprintf("[connId %v]:send -> %v\n", n, i)))
+					reqData := api.MarshalJsonData(api.PingReq{
+						Msg:       fmt.Sprintf("[connId %v]:ping -> %v", n, time.Now().UnixMilli()),
+						TimeStamp: time.Now().UnixMilli(),
+					})
+					conn.SendMsg([]byte(reqData))
 					time.Sleep(1 * time.Second)
 				}
 			}(n)

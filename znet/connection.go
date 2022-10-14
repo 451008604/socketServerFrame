@@ -12,19 +12,19 @@ type Connection struct {
 	ConnID uint32
 	// 当前连接是否已关闭
 	isClosed bool
-	// 该连接的处理方法api
-	handleAPI iface.HandFunc
+	// 该连接的处理方法router
+	Router iface.IRouter
 	// 通知该连接已经退出的channel
 	ExitBuffChan chan bool
 }
 
 // NewConnection 新建连接
-func NewConnection(conn *net.TCPConn, connID uint32, callbackApi iface.HandFunc) *Connection {
+func NewConnection(conn *net.TCPConn, connID uint32, router iface.IRouter) *Connection {
 	c := &Connection{
 		Conn:         conn,
 		ConnID:       connID,
 		isClosed:     false,
-		handleAPI:    callbackApi,
+		Router:       router,
 		ExitBuffChan: make(chan bool, 1),
 	}
 	return c
@@ -37,15 +37,20 @@ func (c *Connection) StartReader() {
 	for {
 		buf := make([]byte, 512)
 		// 缓冲区数据写入到buf中
-		cnt, err := c.Conn.Read(buf)
+		_, err := c.Conn.Read(buf)
 		if err != nil {
 			c.ExitBuffChan <- true
 			continue
 		}
-		// 调用当前连接业务逻辑处理函数
-		if err = c.handleAPI(c.Conn, buf, cnt); err != nil {
-			c.ExitBuffChan <- true
-		}
+
+		// 封装请求和请求数据
+		req := &Request{conn: c, data: buf}
+		// 使用goroutine处理请求数据
+		go func(request iface.IRequest) {
+			c.Router.PreHandler(request)
+			c.Router.Handler(request)
+			c.Router.AfterHandler(request)
+		}(req)
 	}
 }
 

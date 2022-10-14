@@ -5,6 +5,6 @@ package iface
 	实际上是把客户端请求的连接信息 和 请求的数据 包装到了 Request里
 */
 type IRequest interface {
-	GetConnection() // 获取请求连接信息
-	GetData()       // 获取请求消息的数据
+	GetConnection() IConnection // 获取请求连接信息
+	GetData() []byte            // 获取请求消息的数据
 }

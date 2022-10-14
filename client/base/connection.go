@@ -3,6 +3,7 @@ package base
 import (
 	"fmt"
 	"net"
+	"socketServerFrame/client/api"
 	"sync"
 	"time"
 )
@@ -63,8 +64,11 @@ func (c *CustomConnect) NewConnection(address, port string) {
 				return
 			}
 
+			resData := &api.PingReq{}
+			str := string(receiveData)
+			api.UnmarshalJsonData([]byte(str), resData)
 			// 服务器返回的消息
-			fmt.Printf("服务返回 -> %s", string(receiveData))
+			fmt.Printf("服务返回 -> %s 延迟：%v\n", resData.Msg, time.Now().UnixMilli()-resData.TimeStamp)
 		}
 	}(c)
 	c.wg.Wait()
@@ -107,5 +111,5 @@ func (c *CustomConnect) receiveMsg() []byte {
 		fmt.Println("receiveMsg err", err.Error())
 		return nil
 	}
-	return buf
+	return buf[:74]
 }
