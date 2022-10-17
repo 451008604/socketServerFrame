@@ -7,12 +7,12 @@ import (
 	"log"
 	"os"
 	"socketServerFrame/iface"
+	"socketServerFrame/logs"
 )
 
 var configPath string // 配置的文件夹路径
 
 type GlobalObj struct {
-	ErrInfo     error
 	TcpServer   iface.IServer // TCP全局对象
 	Host        string        // 当前服务主机IP
 	TcpPort     string        // 当前服务端口
@@ -37,10 +37,8 @@ func init() {
 
 	globalObject.Reload()
 
-	log.Println(fmt.Sprintf("服务配置参数：%v", globalObject))
-	if globalObject.ErrInfo != nil {
-		panic(fmt.Sprintf("配置文件加载失败：%s", globalObject.ErrInfo.Error()))
-	}
+	str, _ := json.Marshal(globalObject)
+	log.Println(fmt.Sprintf("服务配置参数：%v", string(str)))
 }
 
 // GetGlobalObject 获取全局配置对象
@@ -49,7 +47,8 @@ func GetGlobalObject() GlobalObj {
 }
 
 func (o *GlobalObj) Reload() {
-	o.ErrInfo = json.Unmarshal(getConfigDataToBytes("config.json"), &globalObject)
+	err := json.Unmarshal(getConfigDataToBytes("config.json"), &globalObject)
+	logs.PrintToConsoleErr(err)
 }
 
 // 获取配置数据到字节
@@ -59,8 +58,6 @@ func getConfigDataToBytes(configName string) []byte {
 	}
 
 	bytes, err := ioutil.ReadFile(configPath + "./" + configName)
-	if err != nil {
-		panic(fmt.Sprintf("配置文件加载失败：%s", err.Error()))
-	}
+	logs.PrintToConsolePanic(err)
 	return bytes
 }

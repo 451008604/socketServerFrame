@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"socketServerFrame/client/api"
+	"socketServerFrame/logs"
 	"sync"
 	"time"
 )
@@ -31,9 +32,8 @@ func (c *CustomConnect) NewConnection(address, port string) {
 	// 与服务器请求连接
 	serverAddress := address + ":" + port
 	dial, err := net.Dial("tcp", serverAddress)
-	if err != nil {
+	if logs.PrintToConsoleErr(err, fmt.Sprintf("服务器连接失败：%v \n第 %v 次尝试重连中...\n", serverAddress, restartConnectNum)) {
 		restartConnectNum++
-		fmt.Println(fmt.Sprintf("服务器连接失败：%v \n第 %v 次尝试重连中...\n", serverAddress, restartConnectNum))
 
 		// 与服务器连接失败等待2秒重试，期间会阻塞主进程
 		time.Sleep(2 * time.Second)
@@ -92,8 +92,7 @@ func (c *CustomConnect) SendMsg(msg []byte) {
 		return
 	}
 	_, err := c.Write(msg)
-	if err != nil {
-		fmt.Println("SendMsg err ", err)
+	if logs.PrintToConsoleErr(err, "SendMsg err ") {
 		// 重新连接服务器
 		c.NewConnection(c.address, c.port)
 	}
@@ -107,8 +106,7 @@ func (c *CustomConnect) receiveMsg() []byte {
 	buf := make([]byte, c.bufferLen)
 	_, err := c.Read(buf)
 	// 现有连接发生错误时尝试重新与服务器建立连接
-	if err != nil {
-		fmt.Println("receiveMsg err", err.Error())
+	if logs.PrintToConsoleErr(err, "receiveMsg err") {
 		return nil
 	}
 	return buf[:74]
