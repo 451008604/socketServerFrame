@@ -1,8 +1,10 @@
 package logs
 
+import "fmt"
+
 type errData struct {
 	err  error
-	tips string
+	tips []string
 }
 
 var infoCh = make(chan string)
@@ -14,9 +16,13 @@ func init() {
 		for {
 			select {
 			case msg := <-infoCh:
-				println(msg)
+				fmt.Println(msg)
 			case errInfo := <-errCh:
-				println(errInfo.tips, errInfo.err.Error())
+				if len(errInfo.tips) > 0 {
+					fmt.Println(errInfo.tips, errInfo.err.Error())
+				} else {
+					fmt.Println(errInfo.err.Error())
+				}
 			case panicInfo := <-panicCh:
 				panic(panicInfo)
 			default:
@@ -40,13 +46,9 @@ func PrintToConsoleErr(err error, tips ...string) bool {
 		return false
 	}
 
-	str := ""
-	for i := 0; i < len(tips); i++ {
-		str += tips[i]
-	}
 	errCh <- errData{
 		err:  err,
-		tips: str,
+		tips: tips,
 	}
 	return true
 }
