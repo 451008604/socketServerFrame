@@ -1,8 +1,10 @@
 package main
 
 import (
+	"socketServerFrame/client/api"
 	"socketServerFrame/iface"
 	"socketServerFrame/znet"
+	"time"
 )
 
 type PingRouter struct {
@@ -10,7 +12,13 @@ type PingRouter struct {
 }
 
 func (p *PingRouter) Handler(req iface.IRequest) {
-	_, _ = req.GetConnection().GetTCPConnection().Write(req.GetData())
+	// _, _ = req.GetConnection().GetTCPConnection().Write(req.GetData())
+
+	reqData := api.MarshalJsonData(api.PingReq{
+		Msg:       string(req.GetData()),
+		TimeStamp: time.Now().UnixMilli(),
+	})
+	req.GetConnection().SendMsg(1, []byte(reqData))
 }
 
 func main() {

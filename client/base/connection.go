@@ -2,9 +2,12 @@ package base
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"socketServerFrame/client/api"
+	"socketServerFrame/config"
 	"socketServerFrame/logs"
+	"socketServerFrame/znet"
 	"sync"
 	"time"
 )
@@ -14,7 +17,7 @@ type CustomConnect struct {
 	net.Conn
 	address   string // 服务地址
 	port      string // 服务端口
-	bufferLen int    // 消息缓冲区长度
+	bufferLen uint32 // 消息缓冲区长度
 	wg        *sync.WaitGroup
 }
 
@@ -50,7 +53,7 @@ func (c *CustomConnect) NewConnection(address, port string) {
 	c.Conn = dial
 	c.address = address
 	c.port = port
-	c.bufferLen = 512
+	c.bufferLen = config.GetGlobalObject().MaxPackSize
 
 	// 阻塞主进程
 	c.wg = &sync.WaitGroup{}
@@ -65,8 +68,7 @@ func (c *CustomConnect) NewConnection(address, port string) {
 			}
 
 			resData := &api.PingReq{}
-			str := string(receiveData)
-			api.UnmarshalJsonData([]byte(str), resData)
+			api.UnmarshalJsonData(receiveData, resData)
 			// 服务器返回的消息
 			fmt.Printf("服务返回 -> %s 延迟：%v\n", resData.Msg, time.Now().UnixMilli()-resData.TimeStamp)
 		}
@@ -87,11 +89,16 @@ func _() {
 }
 
 // SendMsg 发送消息到服务器
-func (c *CustomConnect) SendMsg(msg []byte) {
+func (c *CustomConnect) SendMsg(msgId uint32, msgData []byte) {
 	if c == nil {
 		return
 	}
+
+	// 格式化消息
+	dp := znet.NewDataPack()
+	msg := dp.Pack(znet.NewMsgPackage(msgId, msgData))
 	_, err := c.Write(msg)
+
 	if logs.PrintToConsoleErr(err, "SendMsg err ") {
 		// 重新连接服务器
 		c.NewConnection(c.address, c.port)
@@ -103,11 +110,25 @@ func (c *CustomConnect) receiveMsg() []byte {
 	if c == nil {
 		return nil
 	}
-	buf := make([]byte, c.bufferLen)
-	_, err := c.Read(buf)
-	// 现有连接发生错误时尝试重新与服务器建立连接
-	if logs.PrintToConsoleErr(err, "receiveMsg err") {
+
+	dp := znet.NewDataPack()
+	// 获取消息头信息
+	headData := make([]byte, dp.GetHeadLen())
+	_, err := io.ReadFull(c.Conn, headData)
+	if err != nil {
 		return nil
 	}
-	return buf[:74]
+	// 获取消息body
+	msgData := dp.Unpack(headData)
+	if msgData == nil {
+		return nil
+	}
+	if msgData.GetDataLen() > 0 {
+		msgData.SetData(make([]byte, msgData.GetDataLen()))
+		_, err = io.ReadFull(c.Conn, msgData.GetData())
+		if logs.PrintToConsoleErr(err) {
+			return nil
+		}
+	}
+	return msgData.GetData()
 }

@@ -24,7 +24,7 @@ func main() {
 						Msg:       fmt.Sprintf("[connId %v]:ping -> %v", n, time.Now().UnixMilli()),
 						TimeStamp: time.Now().UnixMilli(),
 					})
-					conn.SendMsg([]byte(reqData))
+					conn.SendMsg(2001, []byte(reqData))
 					time.Sleep(1 * time.Second)
 				}
 			}(n)

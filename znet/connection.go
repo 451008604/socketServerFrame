@@ -1,8 +1,10 @@
 package znet
 
 import (
+	"io"
 	"net"
 	"socketServerFrame/iface"
+	"socketServerFrame/logs"
 )
 
 type Connection struct {
@@ -35,16 +37,31 @@ func (c *Connection) StartReader() {
 	defer c.Stop()
 
 	for {
-		buf := make([]byte, 512)
-		// 缓冲区数据写入到buf中
-		_, err := c.Conn.Read(buf)
-		if err != nil {
+		dp := NewDataPack()
+
+		// 获取客户端的消息头信息
+		headData := make([]byte, dp.GetHeadLen())
+		_, err := io.ReadFull(c.GetTCPConnection(), headData)
+		if logs.PrintToConsoleErr(err) {
 			c.ExitBuffChan <- true
-			continue
+		}
+		// 通过消息头获取dataLen和Id
+		msgData := dp.Unpack(headData)
+		if msgData == nil {
+			c.ExitBuffChan <- true
+		}
+		// 通过消息头获取消息body
+		if msgData.GetDataLen() > 0 {
+			msgData.SetData(make([]byte, msgData.GetDataLen()))
+			_, err = io.ReadFull(c.GetTCPConnection(), msgData.GetData())
+			if logs.PrintToConsoleErr(err) {
+				c.ExitBuffChan <- true
+				continue
+			}
 		}
 
 		// 封装请求和请求数据
-		req := &Request{conn: c, data: buf}
+		req := &Request{conn: c, msg: msgData}
 		// 使用goroutine处理请求数据
 		go func(request iface.IRequest) {
 			c.Router.PreHandler(request)
@@ -70,7 +87,7 @@ func (c *Connection) Start() {
 
 // Stop 停止连接
 func (c *Connection) Stop() {
-	if c.isClosed == true {
+	if c.isClosed {
 		return
 	}
 	c.isClosed = true
@@ -96,4 +113,25 @@ func (c *Connection) GetConnID() uint32 {
 // RemoteAddr 获取客户端地址信息
 func (c *Connection) RemoteAddr() net.Addr {
 	return c.Conn.RemoteAddr()
+}
+
+// SendMsg 发送消息给客户端
+func (c *Connection) SendMsg(msgId uint32, data []byte) {
+	if c.isClosed {
+		logs.PrintToConsoleInfo("连接已关闭导致消息发送失败")
+		return
+	}
+
+	// 新建数据传输包
+	dp := NewDataPack()
+	// 将消息数据封包
+	msg := dp.Pack(NewMsgPackage(msgId, data))
+	if msg == nil {
+		return
+	}
+	// 写入传输通道发送给客户端
+	_, err := c.Conn.Write(msg)
+	if logs.PrintToConsoleErr(err) {
+		c.ExitBuffChan <- true
+	}
 }
