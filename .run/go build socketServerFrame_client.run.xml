@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
     <configuration default="false" name="go build socketServerFrame/client" type="GoApplicationRunConfiguration"
                    factoryName="Go Application" nameIsGenerated="true">
-        <module name="socketServerFrame"/>
+        <module name="SocketServerFrame"/>
         <working_directory value="$PROJECT_DIR$"/>
         <kind value="PACKAGE"/>
         <package value="socketServerFrame/client"/>
