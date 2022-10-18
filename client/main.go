@@ -20,11 +20,14 @@ func main() {
 				i := 0
 				for true {
 					i++
+					msgId := uint32(2001)
 					reqData := api.MarshalJsonData(api.PingReq{
-						Msg:       fmt.Sprintf("[connId %v]:ping -> %v", n, time.Now().UnixMilli()),
+						Msg:       fmt.Sprintf("[connId %v][msgId %v]:ping -> %v", n, msgId, time.Now().UnixMilli()),
 						TimeStamp: time.Now().UnixMilli(),
 					})
-					conn.SendMsg(2001, []byte(reqData))
+					conn.SendMsg(msgId, []byte(reqData))
+					msgId = 2002
+					conn.SendMsg(msgId, []byte(reqData))
 					time.Sleep(1 * time.Second)
 				}
 			}(n)

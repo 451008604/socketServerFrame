@@ -8,25 +8,20 @@ import (
 )
 
 type Connection struct {
-	// 当前连接的SocketTCP套接字
-	Conn *net.TCPConn
-	// 当前连接的ID（SessionID）
-	ConnID uint32
-	// 当前连接是否已关闭
-	isClosed bool
-	// 该连接的处理方法router
-	Router iface.IRouter
-	// 通知该连接已经退出的channel
-	ExitBuffChan chan bool
+	Conn         *net.TCPConn      // 当前连接的SocketTCP套接字
+	ConnID       uint32            // 当前连接的ID（SessionID）
+	isClosed     bool              // 当前连接是否已关闭
+	MsgHandler   iface.IMsgHandler // 消息管理MsgId和对应处理函数的消息管理模块
+	ExitBuffChan chan bool         // 通知该连接已经退出的channel
 }
 
 // NewConnection 新建连接
-func NewConnection(conn *net.TCPConn, connID uint32, router iface.IRouter) *Connection {
+func NewConnection(conn *net.TCPConn, connID uint32, msgHandler iface.IMsgHandler) *Connection {
 	c := &Connection{
 		Conn:         conn,
 		ConnID:       connID,
 		isClosed:     false,
-		Router:       router,
+		MsgHandler:   msgHandler,
 		ExitBuffChan: make(chan bool, 1),
 	}
 	return c
@@ -62,12 +57,7 @@ func (c *Connection) StartReader() {
 
 		// 封装请求和请求数据
 		req := &Request{conn: c, msg: msgData}
-		// 使用goroutine处理请求数据
-		go func(request iface.IRequest) {
-			c.Router.PreHandler(request)
-			c.Router.Handler(request)
-			c.Router.AfterHandler(request)
-		}(req)
+		go c.MsgHandler.DoMsgHandler(req)
 	}
 }
 
