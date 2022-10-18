@@ -10,19 +10,22 @@ import (
 )
 
 type fileInfoData struct {
-	info  string
-	stack string
+	prefix string // 标识
+	info   string // 信息
+	stack  string // 堆栈
 }
 
 type fileErrData struct {
-	err   error
-	tips  []string
-	stack string
+	prefix string   // 标识
+	err    error    // 错误信息
+	tips   []string // 自定义提示
+	stack  string   // 堆栈
 }
 
 type filePanicData struct {
-	err   error
-	stack string
+	prefix string // 标识
+	err    error  // 错误信息
+	stack  string // 堆栈
 }
 
 var (
@@ -40,21 +43,21 @@ func init() {
 			// 日志信息
 			case msgInfo := <-fileInfoCh:
 				setLogFile()
-				log.Println(msgInfo.stack, msgInfo.info)
+				log.Println(msgInfo.stack, msgInfo.prefix, msgInfo.info)
 
 			// 错误信息
 			case errInfo := <-fileErrCh:
 				setLogFile()
 				if len(errInfo.tips) > 0 {
-					log.Println(errInfo.stack, errInfo.tips, errInfo.err.Error())
+					log.Println(errInfo.stack, errInfo.prefix, errInfo.tips, errInfo.err.Error())
 				} else {
-					log.Println(errInfo.stack, errInfo.err.Error())
+					log.Println(errInfo.stack, errInfo.prefix, errInfo.err.Error())
 				}
 
 			// panic信息
 			case panicInfo := <-filePanicCh:
 				setLogFile()
-				log.Println(panicInfo.stack, panicInfo.err.Error())
+				log.Println(panicInfo.stack, panicInfo.prefix, panicInfo.err.Error())
 				panic(panicInfo)
 
 			default:
@@ -83,13 +86,11 @@ func PrintLogInfoToFile(msg string) {
 	if msg == "" {
 		return
 	}
-	// 获取堆栈信息
-	_, file, line, _ := runtime.Caller(1)
-	s := file[strings.LastIndex(file, "/")+1:]
 
 	fileInfoCh <- fileInfoData{
-		info:  msg,
-		stack: fmt.Sprintf("%s:%d\t", s, line),
+		prefix: "[info]\t",
+		info:   msg,
+		stack:  getCallerStack(),
 	}
 }
 
@@ -98,14 +99,12 @@ func PrintLogErrToFile(err error, tips ...string) bool {
 	if err == nil {
 		return false
 	}
-	// 获取堆栈信息
-	_, file, line, _ := runtime.Caller(1)
-	s := file[strings.LastIndex(file, "/")+1:]
 
 	fileErrCh <- fileErrData{
-		err:   err,
-		tips:  tips,
-		stack: fmt.Sprintf("%s:%d\t", s, line),
+		prefix: "[err]\t",
+		err:    err,
+		tips:   tips,
+		stack:  getCallerStack(),
 	}
 	return true
 }
@@ -115,12 +114,17 @@ func PrintLogPanicToFile(err error) {
 	if err == nil {
 		return
 	}
-	// 获取堆栈信息
-	_, file, line, _ := runtime.Caller(1)
-	s := file[strings.LastIndex(file, "/")+1:]
 
 	filePanicCh <- filePanicData{
-		err:   err,
-		stack: fmt.Sprintf("%s:%d\t", s, line),
+		prefix: "[panic]\t",
+		err:    err,
+		stack:  getCallerStack(),
 	}
+}
+
+// 获取堆栈信息
+func getCallerStack() string {
+	_, file, line, _ := runtime.Caller(2)
+	s := file[strings.LastIndex(file, "/")+1:]
+	return fmt.Sprintf("%s:%d\t", s, line)
 }
