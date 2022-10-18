@@ -35,7 +35,7 @@ func (c *CustomConnect) NewConnection(address, port string) {
 	// 与服务器请求连接
 	serverAddress := address + ":" + port
 	dial, err := net.Dial("tcp", serverAddress)
-	if logs.PrintLogErrToConsole(err, fmt.Sprintf("服务器连接失败：%v \n第 %v 次尝试重连中...\n", serverAddress, restartConnectNum)) {
+	if logs.PrintLogErrToConsole(err, fmt.Sprintf("服务器连接失败：%v 第 %v 次尝试重连中...", serverAddress, restartConnectNum)) {
 		restartConnectNum++
 
 		// 与服务器连接失败等待2秒重试，期间会阻塞主进程

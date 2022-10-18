@@ -21,9 +21,9 @@ func init() {
 				fmt.Println(msg)
 			case errInfo := <-logErrCh:
 				if len(errInfo.tips) > 0 {
-					fmt.Println(errInfo.tips, errInfo.err.Error())
+					fmt.Println(fmt.Sprintf("%v%v", errInfo.tips, errInfo.err.Error()))
 				} else {
-					fmt.Println(errInfo.err.Error())
+					fmt.Println(fmt.Sprintf("%v", errInfo.err.Error()))
 				}
 			case panicInfo := <-logPanicCh:
 				panic(panicInfo)
