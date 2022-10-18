@@ -3,6 +3,7 @@ package main
 import (
 	"socketServerFrame/client/api"
 	"socketServerFrame/iface"
+	"socketServerFrame/logs"
 	"socketServerFrame/znet"
 	"time"
 )
@@ -18,6 +19,7 @@ func (p *PingRouter) Handler(req iface.IRequest) {
 		Msg:       string(req.GetData()),
 		TimeStamp: time.Now().UnixMilli(),
 	})
+	logs.PrintLogInfoToFile(reqData)
 	req.GetConnection().SendMsg(1, []byte(reqData))
 }
 

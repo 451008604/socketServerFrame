@@ -25,15 +25,15 @@ func (d *DataPack) Pack(msg iface.IMessage) []byte {
 	dataBuff := bytes.NewBuffer([]byte{})
 
 	// 写dataLen
-	if logs.PrintToConsoleErr(binary.Write(dataBuff, binary.LittleEndian, msg.GetDataLen())) {
+	if logs.PrintLogErrToConsole(binary.Write(dataBuff, binary.LittleEndian, msg.GetDataLen())) {
 		return nil
 	}
 	// 写msgId
-	if logs.PrintToConsoleErr(binary.Write(dataBuff, binary.LittleEndian, msg.GetMsgId())) {
+	if logs.PrintLogErrToConsole(binary.Write(dataBuff, binary.LittleEndian, msg.GetMsgId())) {
 		return nil
 	}
 	// 写data数据
-	if logs.PrintToConsoleErr(binary.Write(dataBuff, binary.LittleEndian, msg.GetData())) {
+	if logs.PrintLogErrToConsole(binary.Write(dataBuff, binary.LittleEndian, msg.GetData())) {
 		return nil
 	}
 	return dataBuff.Bytes()
@@ -45,16 +45,16 @@ func (d *DataPack) Unpack(binaryData []byte) iface.IMessage {
 	msgData := &Message{}
 
 	// 读dataLen
-	if logs.PrintToConsoleErr(binary.Read(dataBuff, binary.LittleEndian, &msgData.dataLen)) {
+	if logs.PrintLogErrToConsole(binary.Read(dataBuff, binary.LittleEndian, &msgData.dataLen)) {
 		return nil
 	}
 	// 读msgId
-	if logs.PrintToConsoleErr(binary.Read(dataBuff, binary.LittleEndian, &msgData.id)) {
+	if logs.PrintLogErrToConsole(binary.Read(dataBuff, binary.LittleEndian, &msgData.id)) {
 		return nil
 	}
 	// 检查数据长度是否超出限制
 	if config.GetGlobalObject().MaxPackSize > 0 && msgData.GetDataLen() > config.GetGlobalObject().MaxPackSize {
-		logs.PrintToConsoleInfo("接收数据长度超限")
+		logs.PrintLogInfoToConsole("接收数据长度超限")
 		return nil
 	}
 	return msgData

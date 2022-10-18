@@ -35,7 +35,7 @@ func (c *CustomConnect) NewConnection(address, port string) {
 	// 与服务器请求连接
 	serverAddress := address + ":" + port
 	dial, err := net.Dial("tcp", serverAddress)
-	if logs.PrintToConsoleErr(err, fmt.Sprintf("服务器连接失败：%v \n第 %v 次尝试重连中...\n", serverAddress, restartConnectNum)) {
+	if logs.PrintLogErrToConsole(err, fmt.Sprintf("服务器连接失败：%v \n第 %v 次尝试重连中...\n", serverAddress, restartConnectNum)) {
 		restartConnectNum++
 
 		// 与服务器连接失败等待2秒重试，期间会阻塞主进程
@@ -99,7 +99,7 @@ func (c *CustomConnect) SendMsg(msgId uint32, msgData []byte) {
 	msg := dp.Pack(znet.NewMsgPackage(msgId, msgData))
 	_, err := c.Write(msg)
 
-	if logs.PrintToConsoleErr(err, "SendMsg err ") {
+	if logs.PrintLogErrToConsole(err, "SendMsg err ") {
 		// 重新连接服务器
 		c.NewConnection(c.address, c.port)
 	}
@@ -126,7 +126,7 @@ func (c *CustomConnect) receiveMsg() []byte {
 	if msgData.GetDataLen() > 0 {
 		msgData.SetData(make([]byte, msgData.GetDataLen()))
 		_, err = io.ReadFull(c.Conn, msgData.GetData())
-		if logs.PrintToConsoleErr(err) {
+		if logs.PrintLogErrToConsole(err) {
 			return nil
 		}
 	}

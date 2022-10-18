@@ -36,13 +36,13 @@ func (s *Server) Start() {
 	go func() {
 		// 1.获取TCP的Address
 		addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%s", s.IP, s.Port))
-		if logs.PrintToConsoleErr(err, "服务启动失败：") {
+		if logs.PrintLogErrToConsole(err, "服务启动失败：") {
 			return
 		}
 
 		// 2.监听服务地址
 		tcp, err := net.ListenTCP(s.IPVersion, addr)
-		if logs.PrintToConsoleErr(err, "监听服务地址失败：") {
+		if logs.PrintLogErrToConsole(err, "监听服务地址失败：") {
 			return
 		}
 
@@ -51,13 +51,13 @@ func (s *Server) Start() {
 			// 等待客户端建立请求连接
 			var conn *net.TCPConn
 			conn, err = tcp.AcceptTCP()
-			if logs.PrintToConsoleErr(err, "AcceptTCP ERR：") {
+			if logs.PrintLogErrToConsole(err, "AcceptTCP ERR：") {
 				continue
 			}
 			// 自增connID
 			s.connID++
 			// 建立连接成功
-			logs.PrintToConsoleInfo(fmt.Sprintf("成功建立新的客户端连接 -> %v connID - %v", conn.RemoteAddr().String(), s.connID))
+			logs.PrintLogInfoToConsole(fmt.Sprintf("成功建立新的客户端连接 -> %v connID - %v", conn.RemoteAddr().String(), s.connID))
 
 			// 建立新的连接并监听客户端请求的消息
 			dealConn := NewConnection(conn, s.connID, s.Router)

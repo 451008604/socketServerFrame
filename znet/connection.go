@@ -42,7 +42,7 @@ func (c *Connection) StartReader() {
 		// 获取客户端的消息头信息
 		headData := make([]byte, dp.GetHeadLen())
 		_, err := io.ReadFull(c.GetTCPConnection(), headData)
-		if logs.PrintToConsoleErr(err) {
+		if logs.PrintLogErrToConsole(err) {
 			c.ExitBuffChan <- true
 		}
 		// 通过消息头获取dataLen和Id
@@ -54,7 +54,7 @@ func (c *Connection) StartReader() {
 		if msgData.GetDataLen() > 0 {
 			msgData.SetData(make([]byte, msgData.GetDataLen()))
 			_, err = io.ReadFull(c.GetTCPConnection(), msgData.GetData())
-			if logs.PrintToConsoleErr(err) {
+			if logs.PrintLogErrToConsole(err) {
 				c.ExitBuffChan <- true
 				continue
 			}
@@ -118,7 +118,7 @@ func (c *Connection) RemoteAddr() net.Addr {
 // SendMsg 发送消息给客户端
 func (c *Connection) SendMsg(msgId uint32, data []byte) {
 	if c.isClosed {
-		logs.PrintToConsoleInfo("连接已关闭导致消息发送失败")
+		logs.PrintLogInfoToConsole("连接已关闭导致消息发送失败")
 		return
 	}
 
@@ -131,7 +131,7 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) {
 	}
 	// 写入传输通道发送给客户端
 	_, err := c.Conn.Write(msg)
-	if logs.PrintToConsoleErr(err) {
+	if logs.PrintLogErrToConsole(err) {
 		c.ExitBuffChan <- true
 	}
 }

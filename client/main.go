@@ -11,7 +11,7 @@ import (
 func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
-	for n := 0; n < 5; n++ {
+	for n := 0; n < 1; n++ {
 		go func(n int) {
 			conn := &base.CustomConnect{}
 			conn.NewConnection("127.0.0.1", "7777")

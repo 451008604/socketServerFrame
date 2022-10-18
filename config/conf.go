@@ -48,7 +48,7 @@ func GetGlobalObject() GlobalObj {
 
 func (o *GlobalObj) Reload() {
 	err := json.Unmarshal(getConfigDataToBytes("config.json"), &globalObject)
-	logs.PrintToConsoleErr(err)
+	logs.PrintLogErrToConsole(err)
 }
 
 // 获取配置数据到字节
@@ -58,6 +58,6 @@ func getConfigDataToBytes(configName string) []byte {
 	}
 
 	bytes, err := ioutil.ReadFile(configPath + "./" + configName)
-	logs.PrintToConsolePanic(err)
+	logs.PrintLogPanicToConsole(err)
 	return bytes
 }
