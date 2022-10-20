@@ -13,6 +13,7 @@ type Connection struct {
 	isClosed     bool              // 当前连接是否已关闭
 	MsgHandler   iface.IMsgHandler // 消息管理MsgId和对应处理函数的消息管理模块
 	ExitBuffChan chan bool         // 通知该连接已经退出的channel
+	msgChan      chan []byte       // 用于读、写两个goroutine之间的消息通信
 }
 
 // NewConnection 新建连接
@@ -23,6 +24,7 @@ func NewConnection(conn *net.TCPConn, connID uint32, msgHandler iface.IMsgHandle
 		isClosed:     false,
 		MsgHandler:   msgHandler,
 		ExitBuffChan: make(chan bool, 1),
+		msgChan:      make(chan []byte),
 	}
 	return c
 }
@@ -61,10 +63,27 @@ func (c *Connection) StartReader() {
 	}
 }
 
+// StartWriter 写消息goroutine，用户将数据发送给客户端
+func (c *Connection) StartWriter() {
+	for true {
+		select {
+		case data := <-c.msgChan:
+			_, err := c.Conn.Write(data)
+			if logs.PrintLogErrToConsole(err) {
+				return
+			}
+		case <-c.ExitBuffChan:
+			return
+		}
+	}
+}
+
 // Start 启动连接
 func (c *Connection) Start() {
-	// 开启监听收到该连接请求数据后的处理
+	// 开启用于读的goroutine
 	go c.StartReader()
+	// 开启用于写的goroutine
+	go c.StartWriter()
 
 	for {
 		select {
@@ -120,8 +139,5 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) {
 		return
 	}
 	// 写入传输通道发送给客户端
-	_, err := c.Conn.Write(msg)
-	if logs.PrintLogErrToConsole(err) {
-		c.ExitBuffChan <- true
-	}
+	c.msgChan <- msg
 }
