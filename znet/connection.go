@@ -3,6 +3,7 @@ package znet
 import (
 	"io"
 	"net"
+	"socketServerFrame/config"
 	"socketServerFrame/iface"
 	"socketServerFrame/logs"
 )
@@ -59,7 +60,11 @@ func (c *Connection) StartReader() {
 
 		// 封装请求和请求数据
 		req := &Request{conn: c, msg: msgData}
-		go c.MsgHandler.DoMsgHandler(req)
+		if config.GetGlobalObject().WorkerPoolSize > 0 {
+			c.MsgHandler.SendMsgToTaskQueue(req)
+		} else {
+			go c.MsgHandler.DoMsgHandler(req)
+		}
 	}
 }
 

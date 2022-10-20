@@ -13,26 +13,30 @@ import (
 var configPath string // 配置的文件夹路径
 
 type GlobalObj struct {
-	TcpServer   iface.IServer // TCP全局对象
-	Host        string        // 当前服务主机IP
-	TcpPort     string        // 当前服务端口
-	Name        string        // 当前服务名称
-	Version     string        // 当前服务版本号
-	MaxPackSize uint32        // 传输数据包最大值
-	MaxConn     int           // 当前服务允许的最大连接数
+	TcpServer        iface.IServer // TCP全局对象
+	Host             string        // 当前服务主机IP
+	TcpPort          string        // 当前服务端口
+	Name             string        // 当前服务名称
+	Version          string        // 当前服务版本号
+	MaxPackSize      uint32        // 传输数据包最大值
+	MaxConn          int           // 当前服务允许的最大连接数
+	WorkerPoolSize   uint32        // work池大小
+	WorkerTaskMaxLen uint32        // work对应的执行队列内任务数量的上限
 }
 
 var globalObject *GlobalObj
 
 func init() {
 	globalObject = &GlobalObj{
-		TcpServer:   nil,
-		Host:        "127.0.0.1",
-		TcpPort:     "7777",
-		Name:        "socketServerFrame",
-		Version:     "v0.1",
-		MaxPackSize: 4096,
-		MaxConn:     3,
+		TcpServer:        nil,
+		Host:             "127.0.0.1",
+		TcpPort:          "7777",
+		Name:             "socketServerFrame",
+		Version:          "v0.1",
+		MaxPackSize:      4096,
+		MaxConn:          3,
+		WorkerPoolSize:   10,
+		WorkerTaskMaxLen: 1024,
 	}
 
 	globalObject.Reload()

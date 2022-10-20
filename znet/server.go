@@ -34,6 +34,9 @@ func NewServer() iface.IServer {
 func (s *Server) Start() {
 	// 开启一个go去做服务端Listener服务
 	go func() {
+		// 启动工作池等待接收请求数据
+		s.msgHandler.StartWorkerPool()
+
 		// 1.获取TCP的Address
 		addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%s", s.IP, s.Port))
 		if logs.PrintLogErrToConsole(err, "服务启动失败：") {
