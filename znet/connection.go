@@ -9,6 +9,7 @@ import (
 )
 
 type Connection struct {
+	TcpServer    iface.IServer     // 当前Conn所属的Server
 	Conn         *net.TCPConn      // 当前连接的SocketTCP套接字
 	ConnID       uint32            // 当前连接的ID（SessionID）
 	isClosed     bool              // 当前连接是否已关闭
@@ -18,8 +19,9 @@ type Connection struct {
 }
 
 // NewConnection 新建连接
-func NewConnection(conn *net.TCPConn, connID uint32, msgHandler iface.IMsgHandler) *Connection {
+func NewConnection(server iface.IServer, conn *net.TCPConn, connID uint32, msgHandler iface.IMsgHandler) *Connection {
 	c := &Connection{
+		TcpServer:    server,
 		Conn:         conn,
 		ConnID:       connID,
 		isClosed:     false,
@@ -27,6 +29,9 @@ func NewConnection(conn *net.TCPConn, connID uint32, msgHandler iface.IMsgHandle
 		ExitBuffChan: make(chan bool, 1),
 		msgChan:      make(chan []byte),
 	}
+
+	// 将新建的连接添加到所属Server的连接管理器内
+	c.TcpServer.GetConnMgr().Add(c)
 	return c
 }
 
@@ -110,8 +115,12 @@ func (c *Connection) Stop() {
 	_ = c.Conn.Close()
 	// 通知关闭该连接的监听
 	c.ExitBuffChan <- true
+	// 将连接从连接管理器中删除
+	c.TcpServer.GetConnMgr().Remove(c)
+
 	// 关闭该连接管道
 	close(c.ExitBuffChan)
+	close(c.msgChan)
 }
 
 // GetTCPConnection 从当前连接获取原始的Socket TCPConn

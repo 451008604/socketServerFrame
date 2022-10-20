@@ -34,8 +34,8 @@ func init() {
 		Name:             "socketServerFrame",
 		Version:          "v0.1",
 		MaxPackSize:      4096,
-		MaxConn:          3,
-		WorkerPoolSize:   10,
+		MaxConn:          10,
+		WorkerPoolSize:   3,
 		WorkerTaskMaxLen: 1024,
 	}
 
