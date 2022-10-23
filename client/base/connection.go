@@ -39,7 +39,7 @@ func (c *CustomConnect) NewConnection(address, port string) {
 		restartConnectNum++
 
 		// 与服务器连接失败等待2秒重试，期间会阻塞主进程
-		time.Sleep(2 * time.Second)
+		time.Sleep(5 * time.Second)
 		c.NewConnection(address, port)
 		return
 	}

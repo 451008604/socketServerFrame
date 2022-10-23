@@ -81,8 +81,8 @@ func setLogFile() {
 	log.SetOutput(file)
 }
 
-// PrintLogInfoToFile 打印信息到日志文件
-func PrintLogInfoToFile(msg string) {
+// 打印信息到日志文件
+func printLogInfoToFile(msg string) {
 	if msg == "" {
 		return
 	}
@@ -94,8 +94,8 @@ func PrintLogInfoToFile(msg string) {
 	}
 }
 
-// PrintLogErrToFile 打印错误到日志文件
-func PrintLogErrToFile(err error, tips ...string) bool {
+// 打印错误到日志文件
+func printLogErrToFile(err error, tips ...string) bool {
 	if err == nil {
 		return false
 	}
@@ -109,8 +109,8 @@ func PrintLogErrToFile(err error, tips ...string) bool {
 	return true
 }
 
-// PrintLogPanicToFile 打印Panic到日志文件
-func PrintLogPanicToFile(err error) {
+// 打印Panic到日志文件
+func printLogPanicToFile(err error) {
 	if err == nil {
 		return
 	}
@@ -124,7 +124,7 @@ func PrintLogPanicToFile(err error) {
 
 // 获取堆栈信息
 func getCallerStack() string {
-	_, file, line, _ := runtime.Caller(2)
+	_, file, line, _ := runtime.Caller(3)
 	s := file[strings.LastIndex(file, "/")+1:]
 	return fmt.Sprintf("%s:%d\t", s, line)
 }

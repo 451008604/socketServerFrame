@@ -1,6 +1,8 @@
 package logs
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type logErrData struct {
 	err  error
@@ -34,16 +36,17 @@ func init() {
 	}()
 }
 
-// PrintLogInfoToConsole 打印到控制台信息
-func PrintLogInfoToConsole(msg string) {
+// 打印到控制台信息
+func printLogInfoToConsole(msg string) {
 	if msg == "" {
 		return
 	}
+
 	logInfoCh <- msg
 }
 
-// PrintLogErrToConsole 打印到控制台错误
-func PrintLogErrToConsole(err error, tips ...string) bool {
+// 打印到控制台错误
+func printLogErrToConsole(err error, tips ...string) bool {
 	if err == nil {
 		return false
 	}
@@ -55,10 +58,11 @@ func PrintLogErrToConsole(err error, tips ...string) bool {
 	return true
 }
 
-// PrintLogPanicToConsole 打印到控制台Panic
-func PrintLogPanicToConsole(err error) {
+// 打印到控制台Panic
+func printLogPanicToConsole(err error) {
 	if err == nil {
 		return
 	}
+
 	logPanicCh <- err
 }

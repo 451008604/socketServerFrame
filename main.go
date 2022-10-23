@@ -31,6 +31,12 @@ func (p *PingRouter) Handler(req iface.IRequest) {
 
 func main() {
 	s := znet.NewServer()
+	s.SetOnConnStart(func(conn iface.IConnection) {
+		conn.SendBuffMsg(1, []byte("连接开始"))
+	})
+	s.SetOnConnStop(func(conn iface.IConnection) {
+		conn.SendBuffMsg(2, []byte("连接关闭"))
+	})
 	s.AddRouter(2001, &PingRouter{})
 	s.AddRouter(2002, &PingRouter{})
 	s.Server()
