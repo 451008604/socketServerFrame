@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"runtime"
-	"strings"
+	"strconv"
 	"time"
 )
 
@@ -29,12 +28,14 @@ type filePanicData struct {
 }
 
 var (
-	fileInfoCh  = make(chan fileInfoData)
-	fileErrCh   = make(chan fileErrData)
-	filePanicCh = make(chan filePanicData)
+	fileInfoCh  = make(chan fileInfoData, 100)
+	fileErrCh   = make(chan fileErrData, 100)
+	filePanicCh = make(chan filePanicData, 100)
 )
 
-var todayFlag = 0
+var todayFlag = time.Time{}
+var currentFileName = ""
+var sliceFlag = 0
 
 func init() {
 	go func() {
@@ -43,7 +44,8 @@ func init() {
 			// 日志信息
 			case msgInfo := <-fileInfoCh:
 				setLogFile()
-				log.Println(msgInfo.stack, msgInfo.prefix, msgInfo.info)
+				// log.Println(msgInfo.stack, msgInfo.prefix, msgInfo.info)
+				_ = log.Output(3, fmt.Sprintln(msgInfo.stack, msgInfo.prefix, msgInfo.info))
 
 			// 错误信息
 			case errInfo := <-fileErrCh:
@@ -57,8 +59,7 @@ func init() {
 			// panic信息
 			case panicInfo := <-filePanicCh:
 				setLogFile()
-				log.Println(panicInfo.stack, panicInfo.prefix, panicInfo.err.Error())
-				panic(panicInfo)
+				log.Panicln(panicInfo.stack, panicInfo.prefix, panicInfo.err.Error())
 
 			default:
 				break
@@ -69,16 +70,41 @@ func init() {
 
 func setLogFile() {
 	today := time.Now()
-	if todayFlag == today.Day() {
-		return
+	// 每天重置分段标记
+	if todayFlag.Day() != today.Day() {
+		sliceFlag = 0
 	}
-	todayFlag = today.Day()
-	file, err := os.OpenFile("./logs/log-"+today.Format("2006-01-02")+".log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		return
+	todayFlag = today
+	timeStamp := today.Format("0102")
+
+	// 要写入的日志文件名称
+	fileName := "./logs/log-" + timeStamp + "-" + strconv.Itoa(sliceFlag) + ".log"
+	fileInfo, err := os.Stat(fileName)
+
+	// 文件存在
+	if !os.IsNotExist(err) {
+		// 体积超过限制则建立新的日志文件
+		if fileInfo.Size() >= 1024*1024*50 {
+			sliceFlag++
+			setLogFile()
+			return
+		} else {
+			// 服务重启时开启新的文件片段
+			if currentFileName == "" {
+				sliceFlag++
+				setLogFile()
+				return
+			}
+		}
 	}
-	log.SetFlags(log.LstdFlags)
-	log.SetOutput(file)
+
+	if currentFileName != fileName {
+		currentFileName = fileName
+		// 设置保存日志的文件
+		file, _ := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		log.SetFlags(log.LstdFlags)
+		log.SetOutput(file)
+	}
 }
 
 // 打印信息到日志文件
@@ -124,7 +150,8 @@ func printLogPanicToFile(err error) {
 
 // 获取堆栈信息
 func getCallerStack() string {
-	_, file, line, _ := runtime.Caller(3)
-	s := file[strings.LastIndex(file, "/")+1:]
-	return fmt.Sprintf("%s:%d\t", s, line)
+	// _, file, line, _ := runtime.Caller(3)
+	// s := file[strings.LastIndex(file, "/")+1:]
+	// return fmt.Sprintf("%s:%d\t", s, line)
+	return ""
 }
