@@ -44,7 +44,7 @@ func init() {
 	}
 
 	globalObject.Reload()
-	logs.SetDebugConfig(globalObject.Debug)
+	logs.SetPrintMode(globalObject.Debug)
 
 	str, _ := json.Marshal(globalObject)
 	log.Println(fmt.Sprintf("服务配置参数：%v", string(str)))

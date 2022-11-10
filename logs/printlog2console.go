@@ -29,8 +29,6 @@ func init() {
 				}
 			case panicInfo := <-logPanicCh:
 				panic(panicInfo)
-			default:
-				break
 			}
 		}
 	}()

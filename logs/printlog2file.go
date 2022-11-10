@@ -29,9 +29,9 @@ type filePanicData struct {
 }
 
 var (
-	fileInfoCh  = make(chan fileInfoData, 3000)
-	fileErrCh   = make(chan fileErrData, 3000)
-	filePanicCh = make(chan filePanicData, 3000)
+	fileInfoCh  = make(chan fileInfoData, 5000)
+	fileErrCh   = make(chan fileErrData, 5000)
+	filePanicCh = make(chan filePanicData, 5000)
 )
 
 var logPath = "./logs/"
@@ -62,9 +62,6 @@ func init() {
 			case panicInfo := <-filePanicCh:
 				setLogFile()
 				myLog.Panicln(panicInfo.stack, panicInfo.prefix, panicInfo.err.Error())
-
-			default:
-				break
 			}
 		}
 	}()
@@ -77,7 +74,7 @@ func setLogFile() {
 		sliceFlag = 0
 	}
 	todayFlag = today
-	timeStamp := today.Format("0102")
+	timeStamp := today.Format("20060102")
 
 	// 要写入的日志文件名称
 	fileName := logPath + "log-" + timeStamp + "-" + strconv.Itoa(sliceFlag) + ".log"
@@ -85,8 +82,8 @@ func setLogFile() {
 
 	// 文件存在
 	if !os.IsNotExist(err) {
-		// 体积超过限制则建立新的日志文件(1024*1024*50=50M)
-		if fileInfo.Size() >= 1024*1024*50 {
+		// 体积超过限制则建立新的日志文件(1024*1024*50=52428800=50M)
+		if fileInfo.Size() >= 52428800 {
 			sliceFlag++
 			setLogFile()
 			return
