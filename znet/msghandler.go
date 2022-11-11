@@ -63,10 +63,7 @@ func (m *MsgHandler) SendMsgToTaskQueue(request iface.IRequest) {
 
 // StartOneWorker 启动一个工作协程等待处理接收的请求
 func (m *MsgHandler) StartOneWorker(taskQueue chan iface.IRequest) {
-	for true {
-		select {
-		case request := <-taskQueue:
-			m.DoMsgHandler(request)
-		}
+	for request := range taskQueue {
+		m.DoMsgHandler(request)
 	}
 }

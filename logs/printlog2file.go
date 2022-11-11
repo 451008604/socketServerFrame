@@ -34,7 +34,7 @@ var (
 	filePanicCh = make(chan filePanicData, 5000)
 )
 
-var logPath = "./logs/"
+var logPath = "./logFiles/"
 var todayFlag = time.Time{}
 var currentFileName = ""
 var sliceFlag = 0
@@ -100,6 +100,7 @@ func setLogFile() {
 		return
 	}
 	currentFileName = fileName
+	os.MkdirAll(logPath, 0744)
 	file, _ := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	myLog.SetFlags(log.LstdFlags)
 	myLog.SetOutput(file)
@@ -112,7 +113,7 @@ func printLogInfoToFile(msg string) {
 	}
 
 	fileInfoCh <- fileInfoData{
-		prefix: "[info]\t",
+		prefix: "[info]",
 		info:   msg,
 		stack:  getCallerStack(),
 	}
@@ -125,7 +126,7 @@ func printLogErrToFile(err error, tips ...string) bool {
 	}
 
 	fileErrCh <- fileErrData{
-		prefix: "[err]\t",
+		prefix: "[err]",
 		err:    err,
 		tips:   tips,
 		stack:  getCallerStack(),
@@ -140,7 +141,7 @@ func printLogPanicToFile(err error) {
 	}
 
 	filePanicCh <- filePanicData{
-		prefix: "[panic]\t",
+		prefix: "[panic]",
 		err:    err,
 		stack:  getCallerStack(),
 	}
@@ -150,5 +151,5 @@ func printLogPanicToFile(err error) {
 func getCallerStack() string {
 	_, file, line, _ := runtime.Caller(3)
 	s := file[strings.LastIndex(file, "/")+1:]
-	return s + ":" + strconv.Itoa(line) + "\t"
+	return s + ":" + strconv.Itoa(line)
 }

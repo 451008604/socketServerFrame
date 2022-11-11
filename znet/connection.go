@@ -99,7 +99,7 @@ func (c *Connection) StartReader() {
 			}
 		}
 
-		// 封装请求和请求数据
+		// 封装请求数据传入处理函数
 		req := &Request{conn: c, msg: msgData}
 		if config.GetGlobalObject().WorkerPoolSize > 0 {
 			c.MsgHandler.SendMsgToTaskQueue(req)
@@ -111,7 +111,7 @@ func (c *Connection) StartReader() {
 
 // StartWriter 写消息goroutine，用户将数据发送给客户端
 func (c *Connection) StartWriter() {
-	for true {
+	for {
 		select {
 		case data := <-c.msgChan: // 向客户端发送无缓冲通道数据
 			_, err := c.Conn.Write(data)
