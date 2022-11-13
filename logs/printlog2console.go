@@ -4,15 +4,21 @@ import (
 	"fmt"
 )
 
+type logData struct {
+	info  string
+	stack string // 堆栈
+}
+
 type logErrData struct {
-	err  error
-	tips []string
+	err   error
+	tips  []string
+	stack string // 堆栈
 }
 
 var (
-	logInfoCh  = make(chan string)
-	logErrCh   = make(chan logErrData)
-	logPanicCh = make(chan error)
+	logInfoCh  = make(chan logData, 1000)
+	logErrCh   = make(chan logErrData, 1000)
+	logPanicCh = make(chan error, 1000)
 )
 
 func init() {
@@ -20,12 +26,12 @@ func init() {
 		for {
 			select {
 			case msg := <-logInfoCh:
-				fmt.Println(msg)
+				fmt.Println(msg.stack, msg.info)
 			case errInfo := <-logErrCh:
 				if len(errInfo.tips) > 0 {
-					fmt.Println(fmt.Sprintf("%v%v", errInfo.tips, errInfo.err.Error()))
+					fmt.Println(errInfo.stack, fmt.Sprintf("%v%v", errInfo.tips, errInfo.err.Error()))
 				} else {
-					fmt.Println(fmt.Sprintf("%v", errInfo.err.Error()))
+					fmt.Println(errInfo.stack, fmt.Sprintf("%v", errInfo.err.Error()))
 				}
 			case panicInfo := <-logPanicCh:
 				panic(panicInfo)
@@ -40,7 +46,10 @@ func printLogInfoToConsole(msg string) {
 		return
 	}
 
-	logInfoCh <- msg
+	logInfoCh <- logData{
+		info:  msg,
+		stack: getCallerStack(),
+	}
 }
 
 // 打印到控制台错误
@@ -50,8 +59,9 @@ func printLogErrToConsole(err error, tips ...string) bool {
 	}
 
 	logErrCh <- logErrData{
-		err:  err,
-		tips: tips,
+		err:   err,
+		tips:  tips,
+		stack: getCallerStack(),
 	}
 	return true
 }

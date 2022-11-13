@@ -76,26 +76,21 @@ func (c *Connection) StartReader() {
 	defer c.Stop()
 
 	for {
-		dp := NewDataPack()
-
 		// 获取客户端的消息头信息
-		headData := make([]byte, dp.GetHeadLen())
-		_, err := io.ReadFull(c.GetTCPConnection(), headData)
-		if logs.PrintLogErrToConsole(err) {
-			c.ExitBuffChan <- true
+		headData := make([]byte, c.TcpServer.DataPacket().GetHeadLen())
+		if _, err := io.ReadFull(c.GetTCPConnection(), headData); logs.PrintLogErrToConsole(err) {
+			return
 		}
 		// 通过消息头获取dataLen和Id
-		msgData := dp.Unpack(headData)
+		msgData := c.TcpServer.DataPacket().Unpack(headData)
 		if msgData == nil {
-			c.ExitBuffChan <- true
+			return
 		}
 		// 通过消息头获取消息body
 		if msgData.GetDataLen() > 0 {
 			msgData.SetData(make([]byte, msgData.GetDataLen()))
-			_, err = io.ReadFull(c.GetTCPConnection(), msgData.GetData())
-			if logs.PrintLogErrToConsole(err) {
-				c.ExitBuffChan <- true
-				continue
+			if _, err := io.ReadFull(c.GetTCPConnection(), msgData.GetData()); logs.PrintLogErrToConsole(err) {
+				return
 			}
 		}
 
@@ -119,13 +114,12 @@ func (c *Connection) StartWriter() {
 				return
 			}
 		case data, ok := <-c.msgBuffChan: // 向客户端发送有缓冲通道数据
-			if ok {
-				_, err := c.Conn.Write(data)
-				if logs.PrintLogErrToConsole(err) {
-					return
-				}
-			} else {
+			if !ok {
 				break
+			}
+			_, err := c.Conn.Write(data)
+			if logs.PrintLogErrToConsole(err) {
+				return
 			}
 		case <-c.ExitBuffChan:
 			return
@@ -142,12 +136,9 @@ func (c *Connection) Start() {
 
 	c.TcpServer.CallbackOnConnStart(c)
 
-	for {
-		select {
-		// 在收到退出消息时释放进程
-		case <-c.ExitBuffChan:
-			return
-		}
+	// 在收到退出消息时释放进程
+	for range c.ExitBuffChan {
+		return
 	}
 }
 
@@ -170,6 +161,7 @@ func (c *Connection) Stop() {
 	// 关闭该连接管道
 	close(c.ExitBuffChan)
 	close(c.msgChan)
+	close(c.msgBuffChan)
 }
 
 // GetTCPConnection 从当前连接获取原始的Socket TCPConn
@@ -194,10 +186,8 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) {
 		return
 	}
 
-	// 新建数据传输包
-	dp := NewDataPack()
 	// 将消息数据封包
-	msg := dp.Pack(NewMsgPackage(msgId, data))
+	msg := c.TcpServer.DataPacket().Pack(NewMsgPackage(msgId, data))
 	if msg == nil {
 		return
 	}
@@ -212,10 +202,8 @@ func (c *Connection) SendBuffMsg(msgId uint32, data []byte) {
 		return
 	}
 
-	// 新建数据传输包
-	dp := NewDataPack()
 	// 将消息数据封包
-	msg := dp.Pack(NewMsgPackage(msgId, data))
+	msg := c.TcpServer.DataPacket().Pack(NewMsgPackage(msgId, data))
 	if msg == nil {
 		return
 	}

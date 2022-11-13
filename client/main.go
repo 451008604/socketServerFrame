@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"socketServerFrame/client/api"
 	"socketServerFrame/client/base"
+	"socketServerFrame/logs"
 	"sync"
 	"time"
 )
 
 func main() {
+	logs.SetPrintMode(true)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	for n := 0; n < 1; n++ {
@@ -22,12 +24,13 @@ func main() {
 					i++
 					msgId := uint32(2001)
 					reqData := api.MarshalJsonData(api.PingReq{
-						Msg:       fmt.Sprintf("[connId %v][msgId %v]:ping -> %v", n, msgId, time.Now().UnixMilli()),
+						Msg:       fmt.Sprintf("C2S [connId %v][msgId %v]:ping -> %v", n, msgId, time.Now().UnixMilli()),
 						TimeStamp: time.Now().UnixMilli(),
 					})
 					conn.SendMsg(msgId, []byte(reqData))
-					msgId = 2002
-					conn.SendMsg(msgId, []byte(reqData))
+					logs.PrintLogInfoToConsole(reqData)
+					// msgId = 2002
+					// conn.SendMsg(msgId, []byte(reqData))
 					time.Sleep(1 * time.Second)
 				}
 			}(n)

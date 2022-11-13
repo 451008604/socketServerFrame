@@ -6,7 +6,6 @@ import (
 	"socketServerFrame/config"
 	"socketServerFrame/iface"
 	"socketServerFrame/logs"
-	"time"
 )
 
 // Server 定义Server服务类实现IServer接口
@@ -20,6 +19,7 @@ type Server struct {
 	OnConnStart func(connection iface.IConnection) // 该Server连接创建时的Hook函数
 	OnConnStop  func(connection iface.IConnection) // 该Server连接断开时的Hook函数
 	connID      uint32                             // 客户端连接自增ID
+	dataPacket  iface.IDataPack                    // 数据拆包/封包工具
 }
 
 func NewServer() iface.IServer {
@@ -33,6 +33,7 @@ func NewServer() iface.IServer {
 		OnConnStart: nil,
 		OnConnStop:  nil,
 		connID:      0,
+		dataPacket:  NewDataPack(),
 	}
 	return s
 }
@@ -83,7 +84,7 @@ func (s *Server) Start() {
 }
 
 func (s *Server) Stop() {
-	fmt.Println("服务关闭")
+	logs.PrintLogInfoToConsole("服务关闭")
 
 	s.connMgr.ClearConn()
 }
@@ -92,9 +93,7 @@ func (s *Server) Server() {
 	s.Start()
 
 	// 阻塞主线程
-	for true {
-		time.Sleep(10 * time.Second)
-	}
+	select {}
 }
 
 func (s *Server) AddRouter(msgId uint32, router iface.IRouter) {
@@ -127,4 +126,9 @@ func (s *Server) CallbackOnConnStop(conn iface.IConnection) {
 	if s.OnConnStop != nil {
 		s.OnConnStop(conn)
 	}
+}
+
+// DataPacket 获取封包/拆包工具
+func (s *Server) DataPacket() iface.IDataPack {
+	return s.dataPacket
 }

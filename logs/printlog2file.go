@@ -100,7 +100,7 @@ func setLogFile() {
 		return
 	}
 	currentFileName = fileName
-	os.MkdirAll(logPath, 0744)
+	_ = os.MkdirAll(logPath, 0744)
 	file, _ := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	myLog.SetFlags(log.LstdFlags)
 	myLog.SetOutput(file)

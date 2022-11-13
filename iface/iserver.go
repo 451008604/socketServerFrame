@@ -20,4 +20,6 @@ type IServer interface {
 	SetOnConnStop(func(conn IConnection))
 	// CallbackOnConnStop 调用Server连接断开时的Hook函数
 	CallbackOnConnStop(conn IConnection)
+	// DataPacket 获取封包/拆包工具
+	DataPacket() IDataPack
 }

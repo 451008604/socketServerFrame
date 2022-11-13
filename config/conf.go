@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"socketServerFrame/iface"
 	"socketServerFrame/logs"
@@ -47,7 +46,7 @@ func init() {
 	logs.SetPrintMode(globalObject.Debug)
 
 	str, _ := json.Marshal(globalObject)
-	log.Println(fmt.Sprintf("服务配置参数：%v", string(str)))
+	logs.PrintLogInfoToConsole(fmt.Sprintf("服务配置参数：%v", string(str)))
 }
 
 // GetGlobalObject 获取全局配置对象
