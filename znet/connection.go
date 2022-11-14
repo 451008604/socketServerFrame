@@ -148,13 +148,13 @@ func (c *Connection) Stop() {
 		return
 	}
 	c.isClosed = true
+	// 通知关闭该连接的监听
+	c.ExitBuffChan <- true
 
 	c.TcpServer.CallbackOnConnStop(c)
 
 	// 关闭socket连接
 	_ = c.Conn.Close()
-	// 通知关闭该连接的监听
-	c.ExitBuffChan <- true
 	// 将连接从连接管理器中删除
 	c.TcpServer.GetConnMgr().Remove(c)
 

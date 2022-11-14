@@ -61,16 +61,16 @@ func (c *CustomConnect) NewConnection(address, port string) {
 	// 监听服务器返回的消息
 	go func(conn *CustomConnect) {
 		conn.wg.Done()
-		for true {
+		for {
 			receiveData := conn.receiveMsg()
 			if receiveData == nil {
 				return
 			}
 
-			resData := &api.PingReq{}
+			resData := &api.PingRes{}
 			api.UnmarshalJsonData(receiveData, resData)
 			// 服务器返回的消息
-			fmt.Printf("服务返回 -> %s 延迟：%v\n", resData.Msg, time.Now().UnixMilli()-resData.TimeStamp)
+			fmt.Printf(" 延迟：%v\n", resData.Msg)
 		}
 	}(c)
 	c.wg.Wait()

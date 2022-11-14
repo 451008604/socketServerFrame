@@ -57,7 +57,7 @@ func (s *Server) Start() {
 		}
 
 		// 3.启动server网络连接业务
-		for true {
+		for {
 			// 等待客户端建立请求连接
 			var conn *net.TCPConn
 			conn, err = tcp.AcceptTCP()

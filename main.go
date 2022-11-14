@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"socketServerFrame/client/api"
 	"socketServerFrame/iface"
 	"socketServerFrame/logs"
 	"socketServerFrame/znet"
@@ -14,20 +15,14 @@ type PingRouter struct {
 }
 
 func (p *PingRouter) Handler(req iface.IRequest) {
-	// _, _ = req.GetConnection().GetTCPConnection().Write(req.GetData())
+	t := time.Now().UnixMilli()
+	pingReq := api.PingReq{}
+	api.UnmarshalJsonData(req.GetData(), &pingReq)
 
-	// reqData := api.MarshalJsonData(api.PingReq{
-	// 	Msg:       string(req.GetData()),
-	// 	TimeStamp: time.Now().UnixMilli(),
-	// })
-	// if req.GetMsgID() == 2002 {
-	// 	reqData = api.MarshalJsonData(api.PingReq{
-	// 		Msg:       "MsgId 2002",
-	// 		TimeStamp: time.Now().UnixMilli(),
-	// 	})
-	// }
-	logs.PrintLogInfoToFile("服务成功接收心跳")
-	// req.GetConnection().SendMsg(1, []byte(reqData))
+	resData := api.MarshalJsonData(api.PingRes{
+		Msg: t - pingReq.TimeStamp,
+	})
+	req.GetConnection().SendMsg(1, []byte(resData))
 }
 
 func main() {
@@ -44,6 +39,5 @@ func main() {
 		conn.SendBuffMsg(2, []byte("连接关闭"))
 	})
 	s.AddRouter(2001, &PingRouter{})
-	// s.AddRouter(2002, &PingRouter{})
 	s.Server()
 }

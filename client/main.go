@@ -20,7 +20,7 @@ func main() {
 			defer conn.SetBlocking()
 			go func(n int) {
 				i := 0
-				for true {
+				for {
 					i++
 					msgId := uint32(2001)
 					reqData := api.MarshalJsonData(api.PingReq{
@@ -29,9 +29,7 @@ func main() {
 					})
 					conn.SendMsg(msgId, []byte(reqData))
 					logs.PrintLogInfoToConsole(reqData)
-					// msgId = 2002
-					// conn.SendMsg(msgId, []byte(reqData))
-					time.Sleep(1 * time.Second)
+					time.Sleep(5 * time.Second)
 				}
 			}(n)
 		}(n)
