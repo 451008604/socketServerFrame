@@ -33,10 +33,10 @@ func main() {
 		}
 	}(s)
 	s.SetOnConnStart(func(conn iface.IConnection) {
-		conn.SendBuffMsg(1, []byte("连接开始"))
+		conn.SetProperty("Client", conn.RemoteAddr())
 	})
 	s.SetOnConnStop(func(conn iface.IConnection) {
-		conn.SendBuffMsg(2, []byte("连接关闭"))
+		logs.PrintLogInfoToConsole(fmt.Sprintf("客户端%v下线", conn.GetProperty("Client")))
 	})
 	s.AddRouter(2001, &PingRouter{})
 	s.Server()

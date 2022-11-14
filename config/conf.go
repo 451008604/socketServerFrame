@@ -5,24 +5,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"socketServerFrame/iface"
 	"socketServerFrame/logs"
 )
 
 var configPath string // 配置的文件夹路径
 
 type GlobalObj struct {
-	Debug            bool          // 是否Debug模式
-	TcpServer        iface.IServer // TCP全局对象
-	Host             string        // 当前服务主机IP
-	TcpPort          string        // 当前服务端口
-	Name             string        // 当前服务名称
-	Version          string        // 当前服务版本号
-	MaxPackSize      uint32        // 传输数据包最大值
-	MaxConn          int           // 当前服务允许的最大连接数
-	WorkerPoolSize   uint32        // work池大小
-	WorkerTaskMaxLen uint32        // work对应的执行队列内任务数量的上限
-	MaxMsgChanLen    int           // 读写消息的通道最大缓冲数
+	Debug            bool   // 是否Debug模式
+	Host             string // 当前服务主机IP
+	TcpPort          string // 当前服务端口
+	Name             string // 当前服务名称
+	Version          string // 当前服务版本号
+	MaxPackSize      uint32 // 传输数据包最大值
+	MaxConn          int    // 当前服务允许的最大连接数
+	WorkerPoolSize   uint32 // work池大小
+	WorkerTaskMaxLen uint32 // work对应的执行队列内任务数量的上限
+	MaxMsgChanLen    int    // 读写消息的通道最大缓冲数
 }
 
 var globalObject *GlobalObj
@@ -30,7 +28,6 @@ var globalObject *GlobalObj
 func init() {
 	globalObject = &GlobalObj{
 		Debug:            false,
-		TcpServer:        nil,
 		Host:             "127.0.0.1",
 		TcpPort:          "7777",
 		Name:             "socketServerFrame",

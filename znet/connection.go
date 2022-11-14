@@ -78,7 +78,10 @@ func (c *Connection) StartReader() {
 	for {
 		// 获取客户端的消息头信息
 		headData := make([]byte, c.TcpServer.DataPacket().GetHeadLen())
-		if _, err := io.ReadFull(c.GetTCPConnection(), headData); logs.PrintLogErrToConsole(err) {
+		if _, err := io.ReadFull(c.GetTCPConnection(), headData); err != nil {
+			if err != io.EOF {
+				logs.PrintLogErrToConsole(err)
+			}
 			return
 		}
 		// 通过消息头获取dataLen和Id

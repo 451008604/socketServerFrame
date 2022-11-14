@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	logs.SetPrintMode(true)
+	logs.SetPrintMode(false)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	for n := 0; n < 1; n++ {
