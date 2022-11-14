@@ -1,6 +1,7 @@
 package znet
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"socketServerFrame/config"
@@ -185,7 +186,7 @@ func (c *Connection) RemoteAddr() net.Addr {
 // SendMsg 发送消息给客户端（无缓冲）
 func (c *Connection) SendMsg(msgId uint32, data []byte) {
 	if c.isClosed {
-		logs.PrintLogInfoToConsole("连接已关闭导致消息发送失败")
+		logs.PrintLogInfoToConsole(fmt.Sprintf("连接已关闭导致消息发送失败 -> msgId:%v\tdata:%v", msgId, string(data)))
 		return
 	}
 
@@ -201,7 +202,7 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) {
 // SendBuffMsg 发送消息给客户端（有缓冲）
 func (c *Connection) SendBuffMsg(msgId uint32, data []byte) {
 	if c.isClosed {
-		logs.PrintLogInfoToConsole("连接已关闭导致消息发送失败")
+		logs.PrintLogInfoToConsole(fmt.Sprintf("连接已关闭导致消息发送失败 -> msgId:%v\tdata:%v", msgId, string(data)))
 		return
 	}
 
