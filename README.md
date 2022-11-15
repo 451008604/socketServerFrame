@@ -1,10 +1,10 @@
 # socketServerFrame
-```shell
+```
 │  go.mod
 │  go.sum
 │  main.go                              //入口文件
 │
-├─api                                   //接口API逻辑
+├─api                                   //API注册与逻辑实现
 ├─client                                //客户端服务（示例代码，可直接删除）
 │  │  main.go
 │  │
@@ -57,3 +57,16 @@
         router.go
         server.go
 ```
+
+## gRPC配置
+
+- 安装protoc编译器
+
+> https://github.com/protocolbuffers/protobuf/releases/  
+> 下载后解压到任意目录把`bin`里面的`protoc.exe`复制到`%GOPATH%/bin`里面，并配置`PATH`环境变量，确保 protoc 可以正常执行
+
+- 安装相关模块
+
+> go install google.golang.org/protobuf/proto  
+> go install google.golang.org/protobuf/cmd/protoc-gen-go@latest  
+> go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest  
