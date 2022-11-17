@@ -3,7 +3,7 @@ syntax = "proto3";
 package pb;
 option go_package = "./;pb";
 
-//心跳
-message Ping{
-  int64 timeStamp = 1;
+enum MessageID {
+  UNKNOW = 0;
+  PING = 1000;
 }

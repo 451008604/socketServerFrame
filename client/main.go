@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"socketServerFrame/client/api"
+	"google.golang.org/protobuf/proto"
 	"socketServerFrame/client/base"
 	"socketServerFrame/logs"
+	pb "socketServerFrame/proto/bin"
 	"sync"
 	"time"
 )
@@ -22,13 +22,14 @@ func main() {
 				i := 0
 				for {
 					i++
-					msgId := uint32(2001)
-					reqData := api.MarshalJsonData(api.PingReq{
-						Msg:       fmt.Sprintf("C2S [connId %v][msgId %v]:ping -> %v", n, msgId, time.Now().UnixMilli()),
-						TimeStamp: time.Now().UnixMilli(),
-					})
-					conn.SendMsg(msgId, []byte(reqData))
-					logs.PrintLogInfoToConsole(reqData)
+
+					data := &pb.Ping{TimeStamp: time.Now().UnixMicro()}
+					marshal, err := proto.Marshal(data)
+					if err != nil {
+						return
+					}
+					conn.SendMsg(uint32(pb.MessageID_PING), marshal)
+					logs.PrintLogInfoToConsole(data.String())
 					time.Sleep(5 * time.Second)
 				}
 			}(n)

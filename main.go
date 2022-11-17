@@ -3,27 +3,13 @@ package main
 import (
 	"fmt"
 	"runtime"
-	"socketServerFrame/client/api"
+	"socketServerFrame/api"
 	"socketServerFrame/iface"
 	"socketServerFrame/logs"
+	pb "socketServerFrame/proto/bin"
 	"socketServerFrame/znet"
 	"time"
 )
-
-type PingRouter struct {
-	znet.BaseRouter
-}
-
-func (p *PingRouter) Handler(req iface.IRequest) {
-	t := time.Now().UnixMilli()
-	pingReq := api.PingReq{}
-	api.UnmarshalJsonData(req.GetData(), &pingReq)
-
-	resData := api.MarshalJsonData(api.PingRes{
-		Msg: t - pingReq.TimeStamp,
-	})
-	req.GetConnection().SendMsg(1, []byte(resData))
-}
 
 func main() {
 	s := znet.NewServer()
@@ -35,9 +21,9 @@ func main() {
 	s.SetOnConnStart(func(conn iface.IConnection) {
 		conn.SetProperty("Client", conn.RemoteAddr())
 	})
+	s.AddRouter(uint32(pb.MessageID_PING), &api.PingRouter{})
 	s.SetOnConnStop(func(conn iface.IConnection) {
 		logs.PrintLogInfoToConsole(fmt.Sprintf("客户端%v下线", conn.GetProperty("Client")))
 	})
-	s.AddRouter(2001, &PingRouter{})
 	s.Server()
 }

@@ -2,11 +2,12 @@ package base
 
 import (
 	"fmt"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"net"
-	"socketServerFrame/client/api"
 	"socketServerFrame/config"
 	"socketServerFrame/logs"
+	pb "socketServerFrame/proto/bin"
 	"socketServerFrame/znet"
 	"sync"
 	"time"
@@ -67,10 +68,10 @@ func (c *CustomConnect) NewConnection(address, port string) {
 				return
 			}
 
-			resData := &api.PingRes{}
-			api.UnmarshalJsonData(receiveData, resData)
+			resData := &pb.Ping{}
+			_ = proto.Unmarshal(receiveData, resData)
 			// 服务器返回的消息
-			fmt.Printf(" 延迟：%v\n", resData.Msg)
+			fmt.Printf("与服务器延迟：%v 微秒\n", resData.GetTimeStamp())
 		}
 	}(c)
 	c.wg.Wait()
