@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/451008604/socketServerFrame/logs"
 	"google.golang.org/protobuf/proto"
-	"socketServerFrame/logs"
 )
 
 func MarshalProtoData(str proto.Message) []byte {

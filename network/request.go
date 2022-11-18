@@ -1,6 +1,6 @@
-package znet
+package network
 
-import "socketServerFrame/iface"
+import "github.com/451008604/socketServerFrame/iface"
 
 type Request struct {
 	conn iface.IConnection // 已经和客户端建立好的连接

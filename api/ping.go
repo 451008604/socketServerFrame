@@ -2,13 +2,13 @@ package api
 
 import (
 	"github.com/451008604/socketServerFrame/iface"
+	"github.com/451008604/socketServerFrame/network"
 	pb "github.com/451008604/socketServerFrame/proto/bin"
-	"github.com/451008604/socketServerFrame/znet"
 	"time"
 )
 
 type PingRouter struct {
-	znet.BaseRouter
+	network.BaseRouter
 }
 
 func (p *PingRouter) Handler(req iface.IRequest) {

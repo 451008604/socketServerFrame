@@ -1,11 +1,11 @@
-package znet
+package network
 
 import (
 	"errors"
 	"fmt"
-	"socketServerFrame/config"
-	"socketServerFrame/iface"
-	"socketServerFrame/logs"
+	"github.com/451008604/socketServerFrame/config"
+	"github.com/451008604/socketServerFrame/iface"
+	"github.com/451008604/socketServerFrame/logs"
 )
 
 type MsgHandler struct {

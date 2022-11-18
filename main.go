@@ -5,14 +5,14 @@ import (
 	"github.com/451008604/socketServerFrame/api"
 	"github.com/451008604/socketServerFrame/iface"
 	"github.com/451008604/socketServerFrame/logs"
+	"github.com/451008604/socketServerFrame/network"
 	pb "github.com/451008604/socketServerFrame/proto/bin"
-	"github.com/451008604/socketServerFrame/znet"
 	"runtime"
 	"time"
 )
 
 func main() {
-	s := znet.NewServer()
+	s := network.NewServer()
 	go func(s iface.IServer) {
 		for range time.Tick(time.Second * 3) {
 			logs.PrintLogInfoToConsole(fmt.Sprint("当前线程数：", runtime.NumGoroutine(), "\t当前连接数量：", s.GetConnMgr().Len()))

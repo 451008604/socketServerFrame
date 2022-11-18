@@ -1,6 +1,6 @@
-package znet
+package network
 
-import "socketServerFrame/iface"
+import "github.com/451008604/socketServerFrame/iface"
 
 // BaseRouter router基类，业务逻辑根据需要对基类方法重写
 type BaseRouter struct{}
