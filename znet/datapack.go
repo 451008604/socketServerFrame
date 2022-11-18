@@ -3,9 +3,9 @@ package znet
 import (
 	"bytes"
 	"encoding/binary"
-	"socketServerFrame/config"
-	"socketServerFrame/iface"
-	"socketServerFrame/logs"
+	"github.com/451008604/socketServerFrame/config"
+	"github.com/451008604/socketServerFrame/iface"
+	"github.com/451008604/socketServerFrame/logs"
 )
 
 type DataPack struct{}

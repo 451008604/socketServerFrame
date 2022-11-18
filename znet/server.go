@@ -2,10 +2,10 @@ package znet
 
 import (
 	"fmt"
+	"github.com/451008604/socketServerFrame/config"
+	"github.com/451008604/socketServerFrame/iface"
+	"github.com/451008604/socketServerFrame/logs"
 	"net"
-	"socketServerFrame/config"
-	"socketServerFrame/iface"
-	"socketServerFrame/logs"
 )
 
 // Server 定义Server服务类实现IServer接口

@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/451008604/socketServerFrame/api"
+	"github.com/451008604/socketServerFrame/iface"
+	"github.com/451008604/socketServerFrame/logs"
+	pb "github.com/451008604/socketServerFrame/proto/bin"
+	"github.com/451008604/socketServerFrame/znet"
 	"runtime"
-	"socketServerFrame/api"
-	"socketServerFrame/iface"
-	"socketServerFrame/logs"
-	pb "socketServerFrame/proto/bin"
-	"socketServerFrame/znet"
 	"time"
 )
 

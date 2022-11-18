@@ -1,9 +1,9 @@
 package api
 
 import (
-	"socketServerFrame/iface"
-	pb "socketServerFrame/proto/bin"
-	"socketServerFrame/znet"
+	"github.com/451008604/socketServerFrame/iface"
+	pb "github.com/451008604/socketServerFrame/proto/bin"
+	"github.com/451008604/socketServerFrame/znet"
 	"time"
 )
 

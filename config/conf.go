@@ -3,9 +3,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/451008604/socketServerFrame/logs"
 	"io/ioutil"
 	"os"
-	"socketServerFrame/logs"
 )
 
 var configPath string // 配置的文件夹路径
