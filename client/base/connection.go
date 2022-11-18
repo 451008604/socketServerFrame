@@ -2,13 +2,13 @@ package base
 
 import (
 	"fmt"
+	"github.com/451008604/socketServerFrame/config"
+	"github.com/451008604/socketServerFrame/logs"
+	"github.com/451008604/socketServerFrame/network"
+	pb "github.com/451008604/socketServerFrame/proto/bin"
 	"google.golang.org/protobuf/proto"
 	"io"
 	"net"
-	"socketServerFrame/config"
-	"socketServerFrame/logs"
-	pb "socketServerFrame/proto/bin"
-	"socketServerFrame/znet"
 	"sync"
 	"time"
 )
@@ -96,8 +96,8 @@ func (c *CustomConnect) SendMsg(msgId uint32, msgData []byte) {
 	}
 
 	// 格式化消息
-	dp := znet.NewDataPack()
-	msg := dp.Pack(znet.NewMsgPackage(msgId, msgData))
+	dp := network.NewDataPack()
+	msg := dp.Pack(network.NewMsgPackage(msgId, msgData))
 	_, err := c.Write(msg)
 
 	if logs.PrintLogErrToConsole(err, "SendMsg err ") {
@@ -112,7 +112,7 @@ func (c *CustomConnect) receiveMsg() []byte {
 		return nil
 	}
 
-	dp := znet.NewDataPack()
+	dp := network.NewDataPack()
 	// 获取消息头信息
 	headData := make([]byte, dp.GetHeadLen())
 	_, err := io.ReadFull(c.Conn, headData)

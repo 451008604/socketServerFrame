@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/451008604/socketServerFrame/client/base"
+	"github.com/451008604/socketServerFrame/logs"
+	pb "github.com/451008604/socketServerFrame/proto/bin"
 	"google.golang.org/protobuf/proto"
-	"socketServerFrame/client/base"
-	"socketServerFrame/logs"
-	pb "socketServerFrame/proto/bin"
 	"sync"
 	"time"
 )

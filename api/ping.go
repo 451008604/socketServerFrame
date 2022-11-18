@@ -14,8 +14,8 @@ type PingRouter struct {
 func (p *PingRouter) Handler(req iface.IRequest) {
 	t := time.Now().UnixMicro()
 	pingReq := &pb.Ping{}
-	UnmarshalProtoData(req.GetData(), pingReq)
+	ByteToProtocol(req.GetData(), pingReq)
 	pingReq.TimeStamp = t - pingReq.GetTimeStamp()
 
-	req.GetConnection().SendMsg(uint32(pb.MessageID_PING), MarshalProtoData(pingReq))
+	req.GetConnection().SendMsg(uint32(pb.MessageID_PING), ProtocolToByte(pingReq))
 }
