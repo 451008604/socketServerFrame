@@ -1,4 +1,4 @@
-module socketServerFrame
+module github.com/451008604/socketServerFrame
 
 go 1.17
 
