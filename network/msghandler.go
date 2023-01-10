@@ -3,6 +3,7 @@ package network
 import (
 	"errors"
 	"fmt"
+
 	"github.com/451008604/socketServerFrame/config"
 	"github.com/451008604/socketServerFrame/iface"
 	"github.com/451008604/socketServerFrame/logs"
@@ -26,7 +27,7 @@ func NewMsgHandler() *MsgHandler {
 func (m *MsgHandler) DoMsgHandler(request iface.IRequest) {
 	handler, ok := m.Apis[request.GetMsgID()]
 	if !ok {
-		logs.PrintLogInfoToConsole(fmt.Sprintf("api msgID %v is not fund", request.GetMsgID()))
+		logs.PrintLogInfo(fmt.Sprintf("api msgID %v is not fund", request.GetMsgID()))
 		return
 	}
 
@@ -39,7 +40,7 @@ func (m *MsgHandler) DoMsgHandler(request iface.IRequest) {
 // AddRouter 添加路由，绑定处理函数
 func (m *MsgHandler) AddRouter(msgId uint32, router iface.IRouter) {
 	if _, ok := m.Apis[msgId]; ok {
-		logs.PrintLogPanicToConsole(errors.New("消息ID重复绑定Handler"))
+		logs.PrintLogPanic(errors.New("消息ID重复绑定Handler"))
 	}
 	m.Apis[msgId] = router
 }

@@ -4,6 +4,6 @@ package pb;
 option go_package = "./;pb";
 
 enum MessageID {
-  UNKNOW = 0;
+  UNKNOWN = 0;
   PING = 1000;
 }

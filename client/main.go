@@ -1,12 +1,13 @@
 package main
 
 import (
+	"sync"
+	"time"
+
 	"github.com/451008604/socketServerFrame/client/base"
 	"github.com/451008604/socketServerFrame/logs"
 	pb "github.com/451008604/socketServerFrame/proto/bin"
 	"google.golang.org/protobuf/proto"
-	"sync"
-	"time"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 						return
 					}
 					conn.SendMsg(uint32(pb.MessageID_PING), marshal)
-					logs.PrintLogInfoToConsole(data.String())
+					logs.PrintLogInfo(data.String())
 					time.Sleep(5 * time.Second)
 				}
 			}(n)

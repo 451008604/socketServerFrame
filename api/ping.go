@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/451008604/socketServerFrame/iface"
 	"github.com/451008604/socketServerFrame/network"
-	pb "github.com/451008604/socketServerFrame/proto/bin"
+	"github.com/451008604/socketServerFrame/proto/bin"
 	"time"
 )
 

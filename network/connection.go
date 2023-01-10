@@ -2,11 +2,12 @@ package network
 
 import (
 	"fmt"
+	"io"
+	"net"
+
 	"github.com/451008604/socketServerFrame/config"
 	"github.com/451008604/socketServerFrame/iface"
 	"github.com/451008604/socketServerFrame/logs"
-	"io"
-	"net"
 
 	"sync"
 )
@@ -82,7 +83,7 @@ func (c *Connection) StartReader() {
 		headData := make([]byte, c.TcpServer.DataPacket().GetHeadLen())
 		if _, err := io.ReadFull(c.GetTCPConnection(), headData); err != nil {
 			if err != io.EOF {
-				logs.PrintLogErrToConsole(err)
+				logs.PrintLogErr(err)
 			}
 			return
 		}
@@ -94,7 +95,7 @@ func (c *Connection) StartReader() {
 		// 通过消息头获取消息body
 		if msgData.GetDataLen() > 0 {
 			msgData.SetData(make([]byte, msgData.GetDataLen()))
-			if _, err := io.ReadFull(c.GetTCPConnection(), msgData.GetData()); logs.PrintLogErrToConsole(err) {
+			if _, err := io.ReadFull(c.GetTCPConnection(), msgData.GetData()); logs.PrintLogErr(err) {
 				return
 			}
 		}
@@ -115,7 +116,7 @@ func (c *Connection) StartWriter() {
 		select {
 		case data := <-c.msgChan: // 向客户端发送无缓冲通道数据
 			_, err := c.Conn.Write(data)
-			if logs.PrintLogErrToConsole(err) {
+			if logs.PrintLogErr(err) {
 				return
 			}
 		case data, ok := <-c.msgBuffChan: // 向客户端发送有缓冲通道数据
@@ -123,7 +124,7 @@ func (c *Connection) StartWriter() {
 				break
 			}
 			_, err := c.Conn.Write(data)
-			if logs.PrintLogErrToConsole(err) {
+			if logs.PrintLogErr(err) {
 				return
 			}
 		case <-c.ExitBuffChan:
@@ -187,7 +188,7 @@ func (c *Connection) RemoteAddr() net.Addr {
 // SendMsg 发送消息给客户端（无缓冲）
 func (c *Connection) SendMsg(msgId uint32, data []byte) {
 	if c.isClosed {
-		logs.PrintLogInfoToConsole(fmt.Sprintf("连接已关闭导致消息发送失败 -> msgId:%v\tdata:%v", msgId, string(data)))
+		logs.PrintLogInfo(fmt.Sprintf("连接已关闭导致消息发送失败 -> msgId:%v\tdata:%v", msgId, string(data)))
 		return
 	}
 
@@ -203,7 +204,7 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) {
 // SendBuffMsg 发送消息给客户端（有缓冲）
 func (c *Connection) SendBuffMsg(msgId uint32, data []byte) {
 	if c.isClosed {
-		logs.PrintLogInfoToConsole(fmt.Sprintf("连接已关闭导致消息发送失败 -> msgId:%v\tdata:%v", msgId, string(data)))
+		logs.PrintLogInfo(fmt.Sprintf("连接已关闭导致消息发送失败 -> msgId:%v\tdata:%v", msgId, string(data)))
 		return
 	}
 

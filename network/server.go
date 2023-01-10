@@ -2,10 +2,11 @@ package network
 
 import (
 	"fmt"
+	"net"
+
 	"github.com/451008604/socketServerFrame/config"
 	"github.com/451008604/socketServerFrame/iface"
 	"github.com/451008604/socketServerFrame/logs"
-	"net"
 )
 
 // Server 定义Server服务类实现IServer接口
@@ -46,13 +47,13 @@ func (s *Server) Start() {
 
 		// 1.获取TCP的Address
 		addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%s", s.IP, s.Port))
-		if logs.PrintLogErrToConsole(err, "服务启动失败：") {
+		if logs.PrintLogErr(err, "服务启动失败：") {
 			return
 		}
 
 		// 2.监听服务地址
 		tcp, err := net.ListenTCP(s.IPVersion, addr)
-		if logs.PrintLogErrToConsole(err, "监听服务地址失败：") {
+		if logs.PrintLogErr(err, "监听服务地址失败：") {
 			return
 		}
 
@@ -61,7 +62,7 @@ func (s *Server) Start() {
 			// 等待客户端建立请求连接
 			var conn *net.TCPConn
 			conn, err = tcp.AcceptTCP()
-			if logs.PrintLogErrToConsole(err, "AcceptTCP ERR：") {
+			if logs.PrintLogErr(err, "AcceptTCP ERR：") {
 				continue
 			}
 
@@ -74,7 +75,7 @@ func (s *Server) Start() {
 			// 自增connID
 			s.connID = uint32(s.GetConnMgr().Len() + 1)
 			// 建立连接成功
-			logs.PrintLogInfoToConsole(fmt.Sprintf("成功建立新的客户端连接 -> %v connID - %v", conn.RemoteAddr().String(), s.connID))
+			logs.PrintLogInfo(fmt.Sprintf("成功建立新的客户端连接 -> %v connID - %v", conn.RemoteAddr().String(), s.connID))
 
 			// 建立新的连接并监听客户端请求的消息
 			dealConn := NewConnection(s, conn, s.connID, s.msgHandler)
@@ -84,7 +85,7 @@ func (s *Server) Start() {
 }
 
 func (s *Server) Stop() {
-	logs.PrintLogInfoToConsole("服务关闭")
+	logs.PrintLogInfo("服务关闭")
 
 	s.connMgr.ClearConn()
 }

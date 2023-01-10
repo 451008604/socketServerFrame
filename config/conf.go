@@ -3,9 +3,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/451008604/socketServerFrame/logs"
 	"io/ioutil"
-	"os"
+
+	"github.com/451008604/socketServerFrame/logs"
 )
 
 var configPath string // 配置的文件夹路径
@@ -43,7 +43,7 @@ func init() {
 	logs.SetPrintMode(globalObject.Debug)
 
 	str, _ := json.Marshal(globalObject)
-	logs.PrintLogInfoToConsole(fmt.Sprintf("服务配置参数：%v", string(str)))
+	logs.PrintLogInfo(fmt.Sprintf("服务配置参数：%v", string(str)))
 }
 
 // GetGlobalObject 获取全局配置对象
@@ -53,16 +53,17 @@ func GetGlobalObject() GlobalObj {
 
 func (o *GlobalObj) Reload() {
 	err := json.Unmarshal(getConfigDataToBytes("config.json"), &globalObject)
-	logs.PrintLogErrToConsole(err)
+	logs.PrintLogErr(err)
 }
 
 // 获取配置数据到字节
 func getConfigDataToBytes(configName string) []byte {
 	if configPath == "" {
-		configPath = os.Getenv("GOPATH") + "/src/" + globalObject.Name + "/config/"
+		// configPath = os.Getenv("GOPATH") + "/src/" + globalObject.Name + "/config/"
+		configPath = "./config/"
 	}
 
-	bytes, err := ioutil.ReadFile(configPath + "./" + configName)
-	logs.PrintLogPanicToConsole(err)
+	bytes, err := ioutil.ReadFile(configPath + configName)
+	logs.PrintLogPanic(err)
 	return bytes
 }

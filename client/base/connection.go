@@ -2,15 +2,16 @@ package base
 
 import (
 	"fmt"
+	"io"
+	"net"
+	"sync"
+	"time"
+
 	"github.com/451008604/socketServerFrame/config"
 	"github.com/451008604/socketServerFrame/logs"
 	"github.com/451008604/socketServerFrame/network"
 	pb "github.com/451008604/socketServerFrame/proto/bin"
 	"google.golang.org/protobuf/proto"
-	"io"
-	"net"
-	"sync"
-	"time"
 )
 
 // CustomConnect 自定义连接
@@ -36,7 +37,7 @@ func (c *CustomConnect) NewConnection(address, port string) {
 	// 与服务器请求连接
 	serverAddress := address + ":" + port
 	dial, err := net.Dial("tcp", serverAddress)
-	if logs.PrintLogErrToConsole(err, fmt.Sprintf("服务器连接失败：%v 第 %v 次尝试重连中...", serverAddress, restartConnectNum)) {
+	if logs.PrintLogErr(err, fmt.Sprintf("服务器连接失败：%v 第 %v 次尝试重连中...", serverAddress, restartConnectNum)) {
 		restartConnectNum++
 
 		// 与服务器连接失败等待2秒重试，期间会阻塞主进程
@@ -100,7 +101,7 @@ func (c *CustomConnect) SendMsg(msgId uint32, msgData []byte) {
 	msg := dp.Pack(network.NewMsgPackage(msgId, msgData))
 	_, err := c.Write(msg)
 
-	if logs.PrintLogErrToConsole(err, "SendMsg err ") {
+	if logs.PrintLogErr(err, "SendMsg err ") {
 		// 重新连接服务器
 		c.NewConnection(c.address, c.port)
 	}
@@ -127,7 +128,7 @@ func (c *CustomConnect) receiveMsg() []byte {
 	if msgData.GetDataLen() > 0 {
 		msgData.SetData(make([]byte, msgData.GetDataLen()))
 		_, err = io.ReadFull(c.Conn, msgData.GetData())
-		if logs.PrintLogErrToConsole(err) {
+		if logs.PrintLogErr(err) {
 			return nil
 		}
 	}
